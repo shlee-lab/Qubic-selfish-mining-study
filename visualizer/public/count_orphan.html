@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>Daily Orphan Blocks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{ --fg:#111; --muted:#6b7280; --ring:#E9EEF5; --track:#FBF4F2; --fill-orphan:#AA5953; --fill-oq:#831F16; }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:24px;color:var(--fg);}
+    h1{margin:0 0 12px 0;font-size:20px}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+    label{font-size:13px;color:var(--muted)}
+    input[type="date"], select{padding:6px 8px;font-size:14px;border:1px solid #e5e7eb;border-radius:8px;background:#fff}
+    button{padding:6px 10px;font-size:14px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
+    button:hover{background:#f6f6f6}
+    .chart{border:1px solid var(--ring);border-radius:12px;padding:12px;background:#fff;margin-top:8px}
+    .legend{font-size:12px;color:var(--muted);margin:6px 0 12px}
+    .muted{color:var(--muted)}
+    .note{margin:8px 0 0;color:#9CA3AF;font-size:12px}
+
+    /* --- bar list --- */
+    .section{margin:10px 0 2px;color:#374151;font-weight:700;font-size:13px}
+    .bar{display:grid;grid-template-columns:110px 1fr auto;align-items:center;gap:12px;margin:8px 0}
+    .label{font-family:ui-monospace,Menlo,Consolas,monospace;color:#475569;font-size:12px}
+    .meta{font-size:12px;color:#6b7280;min-width:240px;text-align:right}
+    .track{position:relative;height:22px;border-radius:999px;overflow:hidden;background:var(--track);outline:1px solid rgba(0,0,0,0.02)}
+    .fill-orphan,.fill-oq{position:absolute;left:0;top:0;bottom:0;height:100%;border-radius:999px 0 0 999px}
+    .fill-orphan{background:var(--fill-orphan);z-index:1}
+    .fill-oq{background:var(--fill-oq);z-index:2}
+    .pct-orphan-edge{position:absolute;top:50%;transform:translateY(-50%);font-size:11px;font-weight:800;color:#111;white-space:nowrap;padding:0 4px;z-index:3}
+
+    /* tooltip */
+    .tooltip{position:fixed;pointer-events:none;z-index:9999;background:#111827;color:#fff;font-size:12px;border-radius:8px;padding:8px 10px;box-shadow:0 8px 24px rgba(0,0,0,.18);transform:translate(-50%,-120%);opacity:0;transition:opacity .08s}
+    .tooltip.show{opacity:1}
+    .tooltip .k{color:#9CA3AF} .tooltip .v{font-weight:700}
+    .tooltip .chip{display:inline-block;width:.8em;height:.8em;border-radius:2px;margin-right:6px;vertical-align:-1px}
+    .chip-orphan{background:var(--fill-orphan)} .chip-oq{background:var(--fill-oq)}
+  </style>
+</head>
+<body>
+  <h1>Daily Orphan Blocks</h1>
+
+  <div class="row">
+    <label>Interval:&nbsp;</label>
+    <select id="bucket">
+      <option value="1h" selected>1hr</option>
+      <option value="3h">3hr</option>
+      <option value="6h">6hr</option>
+      <option value="1d">1day</option>
+    </select>
+    <div style="width:10px"></div>
+    <label>Date Range:&nbsp;</label>
+    <input id="start" type="date"><span>~</span><input id="end" type="date">
+    <button id="apply">Apply</button>
+    <button id="last14">Last 2 Weeks</button>
+  </div>
+
+  <div id="summary" class="muted" style="margin:6px 0;"></div>
+  <div id="note" class="note"></div>
+
+  <div class="chart">
+    <div class="legend">
+      Base bar = <b style="color:#AA5953">orphan %</b>, overlay = <b style="color:#831F16">orphaned-qubic %</b>.
+    </div>
+    <div id="bars"></div>
+  </div>
+
+  <div id="tooltip" class="tooltip" role="status" aria-live="polite"></div>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const fmt = (n) => (Number(n)||0).toLocaleString();
+    const pad2 = (n) => String(n).padStart(2,'0');
+    const weekday = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+    function candidates(path) {
+      const alt = path.replace('/api/orphan/', '/api/count_orphan/');
+      return [path, alt].map(p => new URL(p, location.origin));
+    }
+    async function getJSON(path, q) {
+      const tried = [];
+      let lastErr;
+      for (const u of candidates(path)) {
+        if (q) Object.entries(q).forEach(([k,v]) => v!=null && u.searchParams.set(k, v));
+        tried.push(u.pathname + (u.search||''));
+        try {
+          const r = await fetch(u.toString(), { cache:'no-store' });
+          if (!r.ok) { lastErr = new Error(`${r.status} ${r.statusText} @ ${u.pathname}`); continue; }
+          return await r.json();
+        } catch (e) { lastErr = e; }
+      }
+      throw new Error(`${lastErr?.message||'All endpoints failed'} | tried: ${tried.join(' → ')}`);
+    }
+
+    function todayUTC(){
+      const now=new Date();
+      return new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()));
+    }
+    function yesterdayUTC(){ const d=todayUTC(); d.setUTCDate(d.getUTCDate()-1); return d; }
+    function iso(d){ return d.toISOString().slice(0,10); }
+    function setRangeDays(days){
+      const end = todayUTC();
+      const start = new Date(end);
+      start.setUTCDate(end.getUTCDate() - (days-1));
+      $('#start').value = iso(start); $('#end').value = iso(end);
+    }
+    function setSingleDay(dateStr){
+      const d = dateStr ? new Date(dateStr+'T00:00:00Z') : todayUTC();
+      const s = iso(d);
+      $('#start').value = s; $('#end').value = s;
+    }
+    function applyBucketDefaultRange(bucket) {
+      if (bucket === '1h') {
+        const target = $('#end').value || iso(yesterdayUTC()); // 1h 기본: 어제(UTC)
+        setSingleDay(target);
+      } else if (bucket === '3h') {
+        setRangeDays(3);
+      } else if (bucket === '6h') {
+        setRangeDays(7);
+      } else {
+        if (!$('#start').value || !$('#end').value) setRangeDays(14);
+      }
+    }
+
+    async function load(){
+      const el = $('#bars'); el.innerHTML = '<div class="muted">Loading…</div>';
+      $('#note').textContent = '';
+      const bucket = $('#bucket').value;
+      const s=$('#start').value, e=$('#end').value;
+
+      if (bucket === '1d') {
+        const daily = await getJSON('/api/orphan/daily', { start:s, end:e });
+        renderDaily(daily);
+        return;
+      }
+
+      try {
+        const hourly = await getJSON('/api/orphan/hourly', { start:s, end:e });
+        if (hourly?.data?.length) {
+          const view = aggregateHourly(hourly.data, bucket);
+          $('#summary').textContent = `Interval: ${bucket} | Period: ${view.start} ~ ${view.end} | Buckets: ${view.data.length}`;
+          if (!view.data.length){
+            el.innerHTML = '<div class="muted">No hourly data in this range.</div>';
+            return;
+          }
+          renderHourlyPretty(view.data, bucket);
+          return;
+        } else {
+          $('#summary').textContent = `Interval: ${bucket} | Period: ${s} ~ ${e} | Buckets: 0`;
+          el.innerHTML = '<div class="muted">No hourly data in this range. Try widening the date range.</div>';
+          return;
+        }
+      } catch (err) {
+        $('#note').textContent = 'Hourly API unavailable. Showing daily as a temporary fallback.';
+        const daily = await getJSON('/api/orphan/daily', { start:s, end:e });
+        renderDaily(daily);
+      }
+    }
+
+    function renderDaily(daily){
+      const el = $('#bars');
+      $('#summary').textContent = `Interval: 1d | Period: ${daily.start} ~ ${daily.end} | Days: ${daily.data?.length ?? 0}`;
+      if (!daily.data?.length){ el.innerHTML = '<div class="muted">No daily data.</div>'; return; }
+      const rows = daily.data.map(d=>({ dateKey:d.date, startISO:d.date+'T00:00:00Z', endISO:d.date+'T23:59:59Z', total:+d.total||0, orphan:+d.orphan||0, orphan_qubic:+d.orphan_qubic||0 }));
+      renderHourlyPretty(rows, '1d');
+    }
+
+    function aggregateHourly(rows, bucket){
+      const step = bucket==='1h' ? 1 : bucket==='3h' ? 3 : bucket==='6h' ? 6 : 24;
+      const by = new Map();
+      let min = Infinity, max = -Infinity;
+
+      for (const r of rows){
+        const ts = Date.parse(r.ts || r.date || r.datetime);
+        if (!Number.isFinite(ts)) continue;
+        min = Math.min(min, ts); max = Math.max(max, ts);
+
+        const d = new Date(ts);
+        const keyObj = bucketKey(d, step);
+        const key = keyObj.startISO + '|' + keyObj.endISO;
+        const cur = by.get(key) || {
+          dateKey: keyObj.dateKey,
+          startISO: keyObj.startISO,
+          endISO: keyObj.endISO,
+          total:0, orphan:0, orphan_qubic:0
+        };
+        cur.total += +r.total||0;
+        cur.orphan += +r.orphan||0;
+        cur.orphan_qubic += +r.orphan_qubic||0;
+        by.set(key, cur);
+      }
+
+      const data = Array.from(by.values()).sort((a,b)=> new Date(a.startISO)-new Date(b.startISO));
+      return {
+        start: isFinite(min) ? new Date(min).toISOString().slice(0,10) : '',
+        end:   isFinite(max) ? new Date(max).toISOString().slice(0,10) : '',
+        data
+      };
+
+      function bucketKey(d, stepH){
+        const y=d.getUTCFullYear(), m=d.getUTCMonth(), day=d.getUTCDate(), h=d.getUTCHours();
+        const baseH = Math.floor(h/stepH)*stepH;
+        const start = new Date(Date.UTC(y,m,day,baseH,0,0));
+        const end = new Date(start.getTime() + stepH*3600*1000);
+        const dateKey = start.toISOString().slice(0,10);
+        return { dateKey, startISO: start.toISOString(), endISO: end.toISOString() };
+      }
+    }
+
+    function prettyLabel(startISO, endISO, bucket){
+      if (bucket === '1d') return startISO.slice(0,10);
+      const s = new Date(startISO), e = new Date(endISO);
+      const sh = pad2(s.getUTCHours()), eh = pad2(e.getUTCHours());
+      if (bucket === '1h') return `${sh} UTC`;
+      return `${sh}–${eh} UTC`; // 3h/6h
+    }
+    function dayHeader(dateKey){
+      const d = new Date(dateKey+'T00:00:00Z');
+      return `${dateKey} (${weekday[d.getUTCDay()]})`;
+    }
+
+    function renderHourlyPretty(data, bucket){
+      const root = $('#bars'); root.innerHTML='';
+      const tip = $('#tooltip');
+
+      let currentDay = null;
+      data.forEach(item=>{
+        if (currentDay !== item.dateKey) {
+          currentDay = item.dateKey;
+          const sec = document.createElement('div');
+          sec.className = 'section';
+          sec.textContent = dayHeader(currentDay);
+          root.appendChild(sec);
+        }
+
+        const total = +item.total||0, orphan=+item.orphan||0, oq=+item.orphan_qubic||0;
+        const pO = total? (orphan/total*100):0, pOQ = total? (oq/total*100):0;
+
+        const row = document.createElement('div'); row.className='bar';
+
+        const lbl = document.createElement('div'); 
+        lbl.className='label';
+        lbl.textContent = prettyLabel(item.startISO, item.endISO, bucket);
+
+        const track = document.createElement('div'); track.className='track';
+        const fO = document.createElement('div'); fO.className='fill-orphan';
+        const fQ = document.createElement('div'); fQ.className='fill-oq';
+
+        const guess=560, minPx=2;
+        const setW=(pct,el)=>{ const px=Math.max((pct/100)*guess, pct>0?minPx:0); el.style.width=(px/guess*100)+'%'; };
+        setW(Math.max(0,Math.min(100,pO)), fO);
+        setW(Math.max(0,Math.min(100,pOQ)), fQ);
+
+        const edge = document.createElement('div'); edge.className='pct-orphan-edge'; edge.textContent = `${pO.toFixed(2)}%`;
+        const meta = document.createElement('div'); meta.className='meta'; meta.textContent = `O ${fmt(orphan)} / OQ ${fmt(oq)} / T ${fmt(total)}`;
+
+        const show = (e)=>{
+          tip.innerHTML =
+            `<div><span class="k"><span class="chip chip-oq"></span>Qubic(in orphan)</span> <span class="v">${pOQ.toFixed(2)}%</span></div>`+
+            `<div><span class="k"><span class="chip chip-orphan"></span>Orphan</span> <span class="v">${pO.toFixed(2)}%</span></div>`;
+          tip.style.left = `${e.clientX}px`; tip.style.top = `${e.clientY-12}px`; tip.classList.add('show');
+        };
+        const move = (e)=>{ tip.style.left = `${e.clientX}px`; tip.style.top = `${e.clientY-12}px`; };
+        const hide = ()=> tip.classList.remove('show');
+
+        track.addEventListener('mouseenter', show);
+        track.addEventListener('mousemove', move);
+        track.addEventListener('mouseleave', hide);
+
+        track.appendChild(fO); track.appendChild(fQ); track.appendChild(edge);
+        row.appendChild(lbl); row.appendChild(track); row.appendChild(meta);
+        root.appendChild(row);
+
+        requestAnimationFrame(()=> positionEdge(track, edge, parseFloat(fO.style.width)||0));
+      });
+
+      window.removeEventListener('resize', onResize);
+      function onResize(){
+        document.querySelectorAll('.bar .track').forEach(t=>{
+          const edge = t.querySelector('.pct-orphan-edge');
+          const w = parseFloat(t.querySelector('.fill-orphan').style.width)||0;
+          positionEdge(t, edge, w);
+        });
+      }
+      window.addEventListener('resize', onResize, { passive:true });
+    }
+
+    function positionEdge(track, label, widthPct){
+      if(!label) return;
+      const tw = track.getBoundingClientRect().width||0;
+      const lw = label.getBoundingClientRect().width||40;
+      const pad = 6;
+      let x = (widthPct/100)*tw + pad;
+      const maxIn = tw - pad - lw;
+      if (x > maxIn) x = Math.max((widthPct/100)*tw - lw - pad, 4);
+      if (widthPct <= .5) x = pad;
+      label.style.left = `${x}px`;
+    }
+
+    $('#apply').addEventListener('click', load);
+    $('#last14').addEventListener('click', ()=>{ setRangeDays(14); load(); });
+    $('#bucket').addEventListener('change', ()=>{ applyBucketDefaultRange($('#bucket').value); load(); });
+
+    applyBucketDefaultRange($('#bucket').value);
+    load();
+  </script>
+  <link rel="stylesheet" href="/nav.css" />
+  <script src="/nav.js" defer></script>
+</body>
+</html>
+

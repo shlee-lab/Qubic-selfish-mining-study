@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Qubic Jobs — LIVE</title>
+  <style>
+    :root { --fg:#111827; --muted:#6b7280; --border:#e5e7eb; --bg:#ffffff; --accent:#3730a3; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; color: var(--fg); background: var(--bg); }
+    header { margin-bottom: 1rem; }
+    h1 { margin: 0 0 .25rem 0; font-size: 1.6rem; }
+    .meta { color: var(--muted); font-size: .95rem; }
+    .card { border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+    .pill { display:inline-block; padding:2px 8px; border-radius:9999px; background:#eef2ff; color:var(--accent); font-weight:600; margin-left:6px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+    th { background: #f9fafb; }
+    a { text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .err { color:#b91c1c; }
+    .pager { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin-top:1rem; }
+    .pager .btn, .pager .num { border:1px solid var(--border); background:#fff; padding:.4rem .7rem; border-radius:8px; cursor:pointer; }
+    .pager .btn[disabled], .pager .num[disabled] { opacity:.5; cursor:not-allowed; }
+    .pager .num.active { background:#eef2ff; color:var(--accent); border-color:#c7d2fe; font-weight:700; }
+    .pager .spacer { color:var(--muted); padding:0 .2rem; }
+    .right { margin-left:auto; color:var(--muted); font-size:.9rem; }
+
+    /* search bar */
+    .search { display:flex; gap:.5rem; align-items:center; margin: 1rem 0 .5rem 0; }
+    .search input[type="text"] {
+      flex:1; padding:.55rem .8rem; border:1px solid var(--border); border-radius:10px; font-size:.95rem;
+    }
+    .search button {
+      padding:.5rem .8rem; border:1px solid var(--border); background:#fff; border-radius:10px; cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Qubic Jobs</h1>
+    <div class="meta">Source: <code>jobs.csv</code> • Times in <strong>UTC</strong></div>
+  </header>
+
+  <section class="card" id="jobs-current">Loading…</section>
+
+  <section>
+    <div class="search">
+      <input id="jobs-q" type="text" inputmode="search" placeholder="Search by height (digits) or block hash (partial)…" />
+      <button id="jobs-clear" type="button">Clear</button>
+    </div>
+
+    <h2 style="margin-top:1rem;">Recent records</h2>
+    <div id="jobs-table-wrap">Loading…</div>
+    <div id="jobs-pager" class="pager" aria-label="pagination"></div>
+  </section>
+
+  <script>
+    const JOBS_CSV_URL   = "/api/jobs.csv";
+    const JOBS_REFRESH_MS= 5000;
+    const JOBS_PAGE_SIZE = 50;
+    const JOBS_MAX_KEEP  = 5000; 
+
+    let jobsHeaderMap = {};
+    let jobsHasHeight=false, jobsHasTs=false, jobsHasPrev=false;
+    let jobsRowsAll = [];   
+    let jobsRowsView = [];    
+
+    let jobsCurrentPage = 1, jobsTotalPages = 1;
+    const $q = () => document.getElementById('jobs-q');
+
+    function parseCSV(text) {
+      const lines = (text || '').trim().split(/\r?\n/);
+      if (!lines.length) return { header: [], rows: [] };
+      const header = lines[0].split(',');
+      const rows = lines.slice(1).filter(Boolean).map(l => l.split(','));
+      return { header, rows };
+    }
+    function toUTCString(ts) {
+      const n = Number(ts);
+      if (!isFinite(n)) return "";
+      const ms = n > 1e10 ? n : n * 1000;
+      return new Date(ms).toISOString().replace(/\.\d{3}Z$/, "Z");
+    }
+    function buildHashLink(h) {
+      if (!h) return '';
+      const t = h.trim();
+      return `<a href="https://localmonero.co/blocks/search/${t}" target="_blank" rel="noopener noreferrer">${t}</a>`;
+    }
+    function jobsDedupSort(header, rows) {
+      jobsHeaderMap = {};
+      header.forEach((h,i) => jobsHeaderMap[h] = i);
+      jobsHasHeight = jobsHeaderMap["height"] !== undefined;
+      jobsHasTs     = jobsHeaderMap["ts"]     !== undefined;
+      jobsHasPrev   = jobsHeaderMap["prev_raw"] !== undefined;
+
+      const byKey = new Map();
+      for (const r of rows) {
+        const key = jobsHasHeight ? r[jobsHeaderMap["height"]]
+                                  : (jobsHasPrev ? r[jobsHeaderMap["prev_raw"]] : String(Math.random()));
+        byKey.set(key, r);
+      }
+      let uniq = Array.from(byKey.values());
+      if (jobsHasHeight) {
+        uniq.sort((a,b) => Number(b[jobsHeaderMap["height"]]) - Number(a[jobsHeaderMap["height"]]));
+      } else if (jobsHasTs) {
+        uniq.sort((a,b) => Number(b[jobsHeaderMap["ts"]]) - Number(a[jobsHeaderMap["ts"]]));
+      }
+      return uniq;
+    }
+
+    // --------- search & view ----------
+    function jobsApplySearch() {
+      const term = ($q().value || '').trim();
+      let view = jobsRowsAll;
+
+      if (term) {
+        const isDigits = /^\d+$/.test(term);
+        if (isDigits && jobsHasHeight) {
+          view = jobsRowsAll.filter(r => r[jobsHeaderMap["height"]] === term);
+        } else if (jobsHasPrev) {
+          const s = term.toLowerCase();
+          view = jobsRowsAll.filter(r => String(r[jobsHeaderMap["prev_raw"]]||'').toLowerCase().includes(s));
+        }
+      } else {
+        if (view.length > JOBS_MAX_KEEP) view = view.slice(0, JOBS_MAX_KEEP);
+      }
+
+      jobsRowsView = view;
+      jobsCurrentPage = 1;
+      jobsRenderCurrent();
+      jobsRenderTable();
+    }
+
+    function jobsRenderCurrent() {
+      const el = document.getElementById("jobs-current");
+      if (!jobsRowsView.length) { el.innerHTML = "<span class='err'>No data</span>"; return; }
+      const first = jobsRowsView[0];
+      const currentHash   = jobsHasPrev   ? first[jobsHeaderMap["prev_raw"]] : "";
+      const currentHeight = jobsHasHeight ? first[jobsHeaderMap["height"]]   : "";
+      const currentTs     = jobsHasTs     ? first[jobsHeaderMap["ts"]]       : "";
+      const timeUTC       = jobsHasTs ? toUTCString(currentTs) : "";
+      el.innerHTML = `
+        <div>
+          <strong>Current target block</strong>:
+          ${currentHash ? `<a href="https://localmonero.co/blocks/search/${currentHash}" target="_blank" rel="noopener noreferrer">${currentHash}</a>` : '<em>n/a</em>'}
+          ${currentHeight !== "" ? `<span class='pill'>h: ${currentHeight}</span>` : ""}
+          ${timeUTC !== "" ? `<span class='pill'>time: ${timeUTC}</span>` : ""}
+        </div>`;
+    }
+
+    function jobsRenderTable() {
+      const wrap = document.getElementById("jobs-table-wrap");
+      if (!jobsRowsView.length) { wrap.innerHTML = ""; document.getElementById("jobs-pager").innerHTML=""; return; }
+      jobsTotalPages = Math.max(1, Math.ceil(jobsRowsView.length / JOBS_PAGE_SIZE));
+      jobsCurrentPage = Math.min(Math.max(1, jobsCurrentPage), jobsTotalPages);
+      const start = (jobsCurrentPage-1)*JOBS_PAGE_SIZE;
+      const pageRows = jobsRowsView.slice(start, start+JOBS_PAGE_SIZE);
+
+      const rowsHtml = pageRows.map(r => {
+        const ts = jobsHasTs ? toUTCString(r[jobsHeaderMap["ts"]]) : "";
+        const h  = jobsHasHeight ? r[jobsHeaderMap["height"]] : "";
+        const link = jobsHasPrev ? buildHashLink(r[jobsHeaderMap["prev_raw"]]) : "";
+        return `<tr>${jobsHasTs?`<td>${ts}</td>`:""}${jobsHasHeight?`<td>${h}</td>`:""}<td>${link}</td></tr>`;
+      }).join("");
+
+      const headCells = [
+        jobsHasTs ? "<th>time (UTC)</th>" : "",
+        jobsHasHeight ? "<th>height</th>" : "",
+        "<th>block_hash (link)</th>"
+      ].join("");
+
+      wrap.innerHTML = `<table><thead><tr>${headCells}</tr></thead><tbody>${rowsHtml}</tbody></table>`;
+      jobsRenderPager();
+    }
+
+    function jobsRenderPager() {
+      const el = document.getElementById("jobs-pager");
+      const canPrev = jobsCurrentPage>1, canNext = jobsCurrentPage<jobsTotalPages;
+      const nums=[]; const s=Math.max(1, jobsCurrentPage-2); const e=Math.min(jobsTotalPages, jobsCurrentPage+2);
+      for(let p=s;p<=e;p++) nums.push(p);
+      const btn=(l,d,fn)=>`<button class="btn" ${d?'disabled':''} onclick="${d?'':fn}">${l}</button>`;
+      const num=(p)=>`<button class="num ${p===jobsCurrentPage?'active':''}" ${p===jobsCurrentPage?'disabled':''} onclick="jobsGoPage(${p})">${p}</button>`;
+      el.innerHTML = `
+        ${btn('⏮ First',!canPrev,'jobsGoFirst()')}
+        ${btn('◀ Prev', !canPrev,'jobsGoPrev()')}
+        ${s>1?'<span class="spacer">…</span>':''}
+        ${nums.map(num).join('')}
+        ${e<jobsTotalPages?'<span class="spacer">…</span>':''}
+        ${btn('Next ▶',!canNext,'jobsGoNext()')}
+        ${btn('Last ⏭',!canNext,'jobsGoLast()')}
+        <span class="right">Page ${jobsCurrentPage} / ${jobsTotalPages} • Total ${jobsRowsView.length} rows</span>`;
+    }
+    window.jobsGoFirst=()=>{jobsCurrentPage=1;jobsRenderTable();}
+    window.jobsGoPrev =()=>{if(jobsCurrentPage>1){jobsCurrentPage--;jobsRenderTable();}}
+    window.jobsGoNext =()=>{if(jobsCurrentPage<jobsTotalPages){jobsCurrentPage++;jobsRenderTable();}}
+    window.jobsGoLast =()=>{jobsCurrentPage=jobsTotalPages;jobsRenderTable();}
+    window.jobsGoPage =(p)=>{jobsCurrentPage=Math.min(Math.max(1,p),jobsTotalPages);jobsRenderTable();}
+
+    function jobsIntegrate(parsed, jumpToFirst=true){
+      const {header,rows}=parsed;
+      if(!header.length){
+        document.getElementById("jobs-current").innerHTML="<span class='err'>No data</span>";
+        document.getElementById("jobs-table-wrap").innerHTML="";
+        document.getElementById("jobs-pager").innerHTML="";
+        return;
+      }
+      const uniqSorted = jobsDedupSort(header, rows);
+      jobsRowsAll = uniqSorted; 
+      if (!($q().value||'').trim() && jobsRowsAll.length > JOBS_MAX_KEEP) {
+        jobsRowsAll = jobsRowsAll.slice(0, JOBS_MAX_KEEP);
+      }
+      if(jumpToFirst) jobsCurrentPage=1;
+      jobsApplySearch();
+    }
+
+    async function jobsPoll(){
+      try{
+        const res=await fetch(JOBS_CSV_URL,{cache:'no-store'});
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const text=await res.text();
+        jobsIntegrate(parseCSV(text), false);
+      }catch(e){
+        document.getElementById("jobs-current").innerHTML="<span class='err'>Failed to load CSV: "+e.message+"</span>";
+      }finally{
+        setTimeout(jobsPoll, JOBS_REFRESH_MS);
+      }
+    }
+
+    // SSE
+    try{
+      const es=new EventSource('/api/jobs/stream');
+      es.addEventListener('jobs',(ev)=>{
+        const {csv}=JSON.parse(ev.data);
+        jobsIntegrate(parseCSV(csv), true);
+      });
+    }catch(_){}
+
+    // search events (debounce)
+    let jobsT=null;
+    $q().addEventListener('input', () => {
+      clearTimeout(jobsT);
+      jobsT=setTimeout(jobsApplySearch, 200);
+    });
+    document.getElementById('jobs-clear').addEventListener('click', ()=>{
+      $q().value=''; jobsApplySearch();
+    });
+
+    jobsPoll();
+  </script>
+    <link rel="stylesheet" href="/nav.css" />
+  <script src="/nav.js" defer></script>
+</body>
+</html>
+

@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Monero Blocks — LIVE</title>
+  <style>
+    :root { --fg:#111827; --muted:#6b7280; --border:#e5e7eb; --bg:#fff; --accent:#3730a3; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; color: var(--fg); background: var(--bg); }
+    h1 { margin: 0 0 .25rem 0; font-size: 1.6rem; }
+    .meta { color: var(--muted); font-size: .95rem; margin-bottom: 1rem; }
+    .card { border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+    .pill { display:inline-block; padding:2px 8px; border-radius:9999px; background:#eef2ff; color:var(--accent); font-weight:600; margin-left:6px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+    th { background: #f9fafb; }
+    .err { color:#b91c1c; }
+    .search { display:flex; gap:.5rem; align-items:center; margin: 1rem 0 .5rem 0; }
+    .search input { flex:1; padding:.55rem .8rem; border:1px solid var(--border); border-radius:10px; font-size:.95rem; }
+    .search button { padding:.5rem .8rem; border:1px solid var(--border); background:#fff; border-radius:10px; cursor:pointer; }
+    .pager { display:flex; gap:.5rem; align-items:center; margin-top:1rem; color:var(--muted); }
+    .pager button { border:1px solid var(--border); background:#fff; padding:.4rem .7rem; border-radius:8px; cursor:pointer; }
+    .pager button[disabled] { opacity:.5; cursor:not-allowed; }
+    .pager .num.active { background:#eef2ff; color:var(--accent); border-color:#c7d2fe; font-weight:700; }
+    .right { margin-left:auto; }
+  </style>
+</head>
+<body>
+  <h1>Monero Blocks</h1>
+  <div class="meta">Source: <code>/api/blocks/uniq</code> • UTC times • polling every 5s</div>
+
+  <section class="card" id="blocks-current">Loading…</section>
+
+  <section>
+    <div class="search">
+      <input id="blocks-q" type="text" inputmode="search" placeholder="Search by height (digits) or block hash (partial)…" />
+      <button id="blocks-clear" type="button">Clear</button>
+    </div>
+
+    <div id="blocks-table-wrap">Loading…</div>
+    <div id="blocks-pager" class="pager" aria-label="pagination"></div>
+  </section>
+
+<script>
+  // ---- config ----
+  const BLOCKS_UNIQ_URL   = "/api/blocks/uniq";
+  const BLOCKS_REFRESH_MS = 5000;
+  const PAGE_SIZE         = 50;
+  const MAX_KEEP          = 5000;
+
+  // ---- state ----
+  let headerMap = {};
+  let rowsAll = [];
+  let rowsView = [];
+  let curPage = 1, totalPages = 1;
+
+  // ---- columns (exact set we use) ----
+  // API/CSV 헤더가 'Timestamp' 처럼 대문자여도 인식되도록 정규화해서 찾음
+  const C = {
+    TS:     ['timestamp'],
+    HEIGHT: ['height'],
+    HASH:   ['block hash','hash'],
+    ORPHAN: ['is_orphan','orphan']
+  };
+
+  const norm = s => String(s||'').trim().toLowerCase();
+  const idxBy = names => {
+    for (const n of names) {
+      const i = headerMap[norm(n)];
+      if (typeof i === 'number') return i;
+    }
+    return -1;
+  };
+
+  function buildHeaderMap(header){
+    const m = {};
+    header.forEach((h,i)=> m[norm(h)] = i);
+    return m;
+  }
+
+  const a = (el, html) => el.innerHTML = html;
+  const $ = sel => document.querySelector(sel);
+
+  function hashLink(h){
+    if (!h) return '';
+    const t = String(h).trim();
+    return `<a href="https://localmonero.co/blocks/search/${t}" target="_blank" rel="noopener noreferrer">${t}</a>`;
+  }
+
+  // ---- integrate data ----
+  function integrate(parsed, jumpToFirst=true){
+    const { header, rows } = parsed;
+    if (!header.length){ a($("#blocks-current"), "<span class='err'>No data</span>"); a($("#blocks-table-wrap"), ""); a($("#blocks-pager"), ""); return; }
+
+    headerMap = buildHeaderMap(header);
+    let list = rows.slice();
+
+    const hi = idxBy(C.HEIGHT);
+    if (hi >= 0) list.sort((a,b)=> Number(b[hi]) - Number(a[hi]));
+
+    rowsAll = (!$("#blocks-q").value.trim() && list.length > MAX_KEEP) ? list.slice(0, MAX_KEEP) : list;
+
+    if (jumpToFirst) curPage = 1;
+    applySearch();
+  }
+
+  // ---- search / render ----
+  function applySearch(){
+    const term = ($("#blocks-q").value || '').trim();
+    const hi = idxBy(C.HEIGHT), hh = idxBy(C.HASH);
+    let view = rowsAll;
+
+    if (term){
+      const isDigits = /^\d+$/.test(term);
+      if (isDigits && hi >= 0){
+        view = rowsAll.filter(r => String(r[hi]) === term);
+      } else if (hh >= 0){
+        const s = term.toLowerCase();
+        view = rowsAll.filter(r => String(r[hh]||'').toLowerCase().includes(s));
+      }
+    }
+
+    rowsView = view;
+    curPage = 1;
+    renderCurrent();
+    renderTable();
+  }
+
+  function renderCurrent(){
+    const box = $("#blocks-current");
+    if (!rowsView.length){ a(box, "<span class='err'>No data</span>"); return; }
+
+    const r  = rowsView[0];
+    const hi = idxBy(C.HEIGHT);
+    const hh = idxBy(C.HASH);
+    const ti = idxBy(C.TS);
+    const oi = idxBy(C.ORPHAN);
+
+    const height = hi>=0 ? r[hi] : '';
+    const hash   = hh>=0 ? r[hh] : '';
+    const ts     = ti>=0 ? r[ti] : '';
+    const orphan = oi>=0 ? r[oi] : '';
+
+    a(box, `
+      <div>
+        <strong>Latest Monero block</strong>:
+        ${hash ? hashLink(hash) : '<em>n/a</em>'}
+        ${height ? `<span class="pill">h: ${height}</span>` : ''}
+        ${ts ? `<span class="pill">time: ${ts}</span>` : ''}
+        ${orphan!=='' ? `<span class="pill">orphan: ${orphan}</span>` : ''}
+      </div>
+    `);
+  }
+
+  function renderTable(){
+    const wrap = $("#blocks-table-wrap");
+    if (!rowsView.length){ a(wrap, ""); a($("#blocks-pager"), ""); return; }
+
+    totalPages = Math.max(1, Math.ceil(rowsView.length / PAGE_SIZE));
+    curPage = Math.min(Math.max(1, curPage), totalPages);
+
+    const start = (curPage-1)*PAGE_SIZE;
+    const pageRows = rowsView.slice(start, start+PAGE_SIZE);
+
+    const cols = {
+      ts:     idxBy(C.TS),
+      height: idxBy(C.HEIGHT),
+      hash:   idxBy(C.HASH),
+      orphan: idxBy(C.ORPHAN),
+    };
+
+    const head = `
+      <th>timestamp (UTC)</th>
+      <th>height</th>
+      <th>block hash</th>
+      <th>is_orphan</th>`;
+
+    const body = pageRows.map(r => `
+      <tr>
+        <td>${cols.ts>=0 ? r[cols.ts] : ''}</td>
+        <td>${cols.height>=0 ? r[cols.height] : ''}</td>
+        <td>${cols.hash>=0 ? hashLink(r[cols.hash]) : ''}</td>
+        <td>${cols.orphan>=0 ? r[cols.orphan] : ''}</td>
+      </tr>
+    `).join("");
+
+    a(wrap, `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`);
+    renderPager();
+  }
+
+  function renderPager(){
+    const el = $("#blocks-pager");
+    const canPrev = curPage>1, canNext = curPage<totalPages;
+    const btn = (label, disabled, fn) => `<button ${disabled?'disabled':''} onclick="${disabled?'':fn}">${label}</button>`;
+    a(el, `
+      ${btn('⏮ First', !canPrev, 'goFirst()')}
+      ${btn('◀ Prev',  !canPrev, 'goPrev()')}
+      <span class="right">Page ${curPage} / ${totalPages} • Total ${rowsView.length}</span>
+      ${btn('Next ▶',  !canNext, 'goNext()')}
+      ${btn('Last ⏭',  !canNext, 'goLast()')}
+    `);
+  }
+  window.goFirst = ()=>{ curPage=1; renderTable(); };
+  window.goPrev  = ()=>{ if(curPage>1){ curPage--; renderTable(); } };
+  window.goNext  = ()=>{ if(curPage<totalPages){ curPage++; renderTable(); } };
+  window.goLast  = ()=>{ curPage=totalPages; renderTable(); };
+
+  async function poll(){
+    try{
+      const res = await fetch(BLOCKS_UNIQ_URL, { cache:'no-store' });
+      const data = await res.json();
+      integrate(data, false);
+    }catch(e){
+      a($("#blocks-current"), "<span class='err'>Failed to load: "+e.message+"</span>");
+    }finally{
+      setTimeout(poll, BLOCKS_REFRESH_MS);
+    }
+  }
+
+  // events
+  let t=null;
+  $("#blocks-q").addEventListener('input', ()=>{ clearTimeout(t); t=setTimeout(applySearch, 200); });
+  $("#blocks-clear").addEventListener('click', ()=>{ $("#blocks-q").value=''; applySearch(); });
+
+  // start
+  poll();
+</script>
+</body>
+</html>

@@ -1,0 +1,680 @@
+nohup: ignoring input
+Listening on http://0.0.0.0:3000
+JOBS CSV:   /home/ubuntu/web3/jobs.csv
+BLOCKS CSV: /home/ubuntu/web3/blocks.csv
+[i] main rows: 72809 (unique heights: 72809)
+[i] orphan rows (raw): 2958; filtered(>= 2025-07-01) kept: 2933
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 75742)
+[i] fetched=2959 | already_in_csv=2958 | new_targets=1
+[progress] 1/1 done | kept=0 skipped(no extra)=1 | elapsed=1.3s ETA=0.0s
+[i] No rows to append (no extra nonce found among new hashes).
+[i] 2025-10-11: heights 3518909..3519635 (727 blocks)
+[i] 2025-10-11: progress 50/727 (height 3518958)
+[i] 2025-10-11: progress 100/727 (height 3519008)
+[i] 2025-10-11: progress 150/727 (height 3519058)
+[i] 2025-10-11: progress 200/727 (height 3519108)
+[i] 2025-10-11: progress 250/727 (height 3519158)
+[i] 2025-10-11: progress 300/727 (height 3519208)
+[i] 2025-10-11: progress 350/727 (height 3519258)
+[i] 2025-10-11: progress 400/727 (height 3519308)
+[i] 2025-10-11: progress 450/727 (height 3519358)
+[i] 2025-10-11: progress 500/727 (height 3519408)
+[i] 2025-10-11: progress 550/727 (height 3519458)
+[i] 2025-10-11: progress 600/727 (height 3519508)
+[i] 2025-10-11: progress 650/727 (height 3519558)
+[i] 2025-10-11: progress 700/727 (height 3519608)
+[i] 2025-10-11: progress 727/727 (height 3519635)
+[i] 2025-10-11: Accepted markers (>= 6): 4fc036ae(x135)
+[i] 2025-10-11: qubic labeled 135/727
+[i] append_rows_dedup: nothing new to append (all duplicates)
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 727 rows (before dedup) for 2025-10-11 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] 2025-10-11: heights 3518909..3519635 (727 blocks)
+[i] 2025-10-11: progress 50/727 (height 3518958)
+[i] 2025-10-11: progress 100/727 (height 3519008)
+[i] 2025-10-11: progress 150/727 (height 3519058)
+[i] 2025-10-11: progress 200/727 (height 3519108)
+[i] 2025-10-11: progress 250/727 (height 3519158)
+[i] 2025-10-11: progress 300/727 (height 3519208)
+[i] 2025-10-11: progress 350/727 (height 3519258)
+[i] 2025-10-11: progress 400/727 (height 3519308)
+[i] 2025-10-11: progress 450/727 (height 3519358)
+[i] 2025-10-11: progress 500/727 (height 3519408)
+[i] 2025-10-11: progress 550/727 (height 3519458)
+[i] 2025-10-11: progress 600/727 (height 3519508)
+[i] 2025-10-11: progress 650/727 (height 3519558)
+[i] 2025-10-11: progress 700/727 (height 3519608)
+[i] 2025-10-11: progress 727/727 (height 3519635)
+[i] 2025-10-11: Accepted markers (>= 6): 4fc036ae(x135)
+[i] 2025-10-11: qubic labeled 135/727
+[i] append_rows_dedup: nothing new to append (all duplicates)
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 727 rows (before dedup) for 2025-10-11 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] main rows: 51768 (unique heights: 51768)
+[i] orphan rows (raw): 2958; filtered(>= 2025-07-01) kept: 2933
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 54670)
+[i] 2025-10-12: heights 3519636..3520350 (715 blocks)
+[i] 2025-10-12: progress 50/715 (height 3519685)
+[i] 2025-10-12: progress 100/715 (height 3519735)
+[i] 2025-10-12: progress 150/715 (height 3519785)
+[i] 2025-10-12: progress 200/715 (height 3519835)
+[i] 2025-10-12: progress 250/715 (height 3519885)
+[i] 2025-10-12: progress 300/715 (height 3519935)
+[i] 2025-10-12: progress 350/715 (height 3519985)
+[i] 2025-10-12: progress 400/715 (height 3520035)
+[i] 2025-10-12: progress 450/715 (height 3520085)
+[i] 2025-10-12: progress 500/715 (height 3520135)
+[i] 2025-10-12: progress 550/715 (height 3520185)
+[i] 2025-10-12: progress 600/715 (height 3520235)
+[i] 2025-10-12: progress 650/715 (height 3520285)
+[i] 2025-10-12: progress 700/715 (height 3520335)
+[i] 2025-10-12: progress 715/715 (height 3520350)
+[i] 2025-10-12: Accepted markers (>= 6): 4fc036ae(x152)
+[i] 2025-10-12: qubic labeled 152/715
+[✔] appended 623 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 715 rows (before dedup) for 2025-10-12 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2963 | already_in_csv=2958 | new_targets=5
+[progress] 5/5 done | kept=4 skipped(no extra)=1 | elapsed=1.6s ETA=0.0s
+[✔] Appended 4 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 52391 (unique heights: 52391)
+[i] orphan rows (raw): 2962; filtered(>= 2025-07-01) kept: 2937
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 55297)
+[i] 2025-10-13: heights 3520351..3521070 (720 blocks)
+[i] 2025-10-13: progress 50/720 (height 3520400)
+[i] 2025-10-13: progress 100/720 (height 3520450)
+[i] 2025-10-13: progress 150/720 (height 3520500)
+[i] 2025-10-13: progress 200/720 (height 3520550)
+[i] 2025-10-13: progress 250/720 (height 3520600)
+[i] 2025-10-13: progress 300/720 (height 3520650)
+[i] 2025-10-13: progress 350/720 (height 3520700)
+[i] 2025-10-13: progress 400/720 (height 3520750)
+[i] 2025-10-13: progress 450/720 (height 3520800)
+[i] 2025-10-13: progress 500/720 (height 3520850)
+[i] 2025-10-13: progress 550/720 (height 3520900)
+[i] 2025-10-13: progress 600/720 (height 3520950)
+[i] 2025-10-13: progress 650/720 (height 3521000)
+[i] 2025-10-13: progress 700/720 (height 3521050)
+[i] 2025-10-13: progress 720/720 (height 3521070)
+[i] 2025-10-13: Accepted markers (>= 6): 4fc036ae(x159)
+[i] 2025-10-13: qubic labeled 159/720
+[✔] appended 720 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 720 rows (before dedup) for 2025-10-13 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2963 | already_in_csv=2962 | new_targets=1
+[progress] 1/1 done | kept=0 skipped(no extra)=1 | elapsed=1.3s ETA=0.0s
+[i] No rows to append (no extra nonce found among new hashes).
+[i] main rows: 53111 (unique heights: 53111)
+[i] orphan rows (raw): 2962; filtered(>= 2025-07-01) kept: 2937
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 56017)
+[i] 2025-10-14: heights 3521071..3521741 (671 blocks)
+[i] 2025-10-14: progress 50/671 (height 3521120)
+[i] 2025-10-14: progress 100/671 (height 3521170)
+[i] 2025-10-14: progress 150/671 (height 3521220)
+[i] 2025-10-14: progress 200/671 (height 3521270)
+[i] 2025-10-14: progress 250/671 (height 3521320)
+[i] 2025-10-14: progress 300/671 (height 3521370)
+[i] 2025-10-14: progress 350/671 (height 3521420)
+[i] 2025-10-14: progress 400/671 (height 3521470)
+[i] 2025-10-14: progress 450/671 (height 3521520)
+[i] 2025-10-14: progress 500/671 (height 3521570)
+[i] 2025-10-14: progress 550/671 (height 3521620)
+[i] 2025-10-14: progress 600/671 (height 3521670)
+[i] 2025-10-14: progress 650/671 (height 3521720)
+[i] 2025-10-14: progress 671/671 (height 3521741)
+[i] 2025-10-14: Accepted markers (>= 6): 4fc036ae(x152)
+[i] 2025-10-14: qubic labeled 152/671
+[✔] appended 671 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 671 rows (before dedup) for 2025-10-14 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2965 | already_in_csv=2962 | new_targets=3
+[progress] 3/3 done | kept=2 skipped(no extra)=1 | elapsed=1.7s ETA=0.0s
+[✔] Appended 2 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 53782 (unique heights: 53782)
+[i] orphan rows (raw): 2964; filtered(>= 2025-07-01) kept: 2939
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 56690)
+[i] 2025-10-15: heights 3521742..3522426 (685 blocks)
+[i] 2025-10-15: progress 50/685 (height 3521791)
+[i] 2025-10-15: progress 100/685 (height 3521841)
+[i] 2025-10-15: progress 150/685 (height 3521891)
+[i] 2025-10-15: progress 200/685 (height 3521941)
+[i] 2025-10-15: progress 250/685 (height 3521991)
+[i] 2025-10-15: progress 300/685 (height 3522041)
+[i] 2025-10-15: progress 350/685 (height 3522091)
+[i] 2025-10-15: progress 400/685 (height 3522141)
+[i] 2025-10-15: progress 450/685 (height 3522191)
+[i] 2025-10-15: progress 500/685 (height 3522241)
+[i] 2025-10-15: progress 550/685 (height 3522291)
+[i] 2025-10-15: progress 600/685 (height 3522341)
+[i] 2025-10-15: progress 650/685 (height 3522391)
+[i] 2025-10-15: progress 685/685 (height 3522426)
+[i] 2025-10-15: Accepted markers (>= 6): 4fc036ae(x51), edeb53f3(x44)
+[i] 2025-10-15: qubic labeled 95/685
+[✔] appended 685 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 685 rows (before dedup) for 2025-10-15 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2965 | already_in_csv=2964 | new_targets=1
+[progress] 1/1 done | kept=0 skipped(no extra)=1 | elapsed=1.6s ETA=0.0s
+[i] No rows to append (no extra nonce found among new hashes).
+[i] main rows: 54467 (unique heights: 54467)
+[i] orphan rows (raw): 2964; filtered(>= 2025-07-01) kept: 2939
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 57375)
+[i] 2025-10-16: heights 3522427..3523235 (809 blocks)
+[i] 2025-10-16: progress 50/809 (height 3522476)
+[i] 2025-10-16: progress 100/809 (height 3522526)
+[i] 2025-10-16: progress 150/809 (height 3522576)
+[i] 2025-10-16: progress 200/809 (height 3522626)
+[i] 2025-10-16: progress 250/809 (height 3522676)
+[i] 2025-10-16: progress 300/809 (height 3522726)
+[i] 2025-10-16: progress 350/809 (height 3522776)
+[i] 2025-10-16: progress 400/809 (height 3522826)
+[i] 2025-10-16: progress 450/809 (height 3522876)
+[i] 2025-10-16: progress 500/809 (height 3522926)
+[i] 2025-10-16: progress 550/809 (height 3522976)
+[i] 2025-10-16: progress 600/809 (height 3523026)
+[i] 2025-10-16: progress 650/809 (height 3523076)
+[i] 2025-10-16: progress 700/809 (height 3523126)
+[i] 2025-10-16: progress 750/809 (height 3523176)
+[i] 2025-10-16: progress 800/809 (height 3523226)
+[i] 2025-10-16: progress 809/809 (height 3523235)
+[i] 2025-10-16: Accepted markers (>= 6): edeb53f3(x160)
+[i] 2025-10-16: qubic labeled 160/809
+[✔] appended 809 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 809 rows (before dedup) for 2025-10-16 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2966 | already_in_csv=2964 | new_targets=2
+[progress] 2/2 done | kept=1 skipped(no extra)=1 | elapsed=1.7s ETA=0.0s
+[✔] Appended 1 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 55276 (unique heights: 55276)
+[i] orphan rows (raw): 2965; filtered(>= 2025-07-01) kept: 2940
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 58185)
+[i] 2025-10-17: heights 3523236..3523897 (662 blocks)
+[i] 2025-10-17: progress 50/662 (height 3523285)
+[i] 2025-10-17: progress 100/662 (height 3523335)
+[i] 2025-10-17: progress 150/662 (height 3523385)
+[i] 2025-10-17: progress 200/662 (height 3523435)
+[i] 2025-10-17: progress 250/662 (height 3523485)
+[i] 2025-10-17: progress 300/662 (height 3523535)
+[i] 2025-10-17: progress 350/662 (height 3523585)
+[i] 2025-10-17: progress 400/662 (height 3523635)
+[i] 2025-10-17: progress 450/662 (height 3523685)
+[i] 2025-10-17: progress 500/662 (height 3523735)
+[i] 2025-10-17: progress 550/662 (height 3523785)
+[i] 2025-10-17: progress 600/662 (height 3523835)
+[i] 2025-10-17: progress 650/662 (height 3523885)
+[i] 2025-10-17: progress 662/662 (height 3523897)
+[i] 2025-10-17: Accepted markers (>= 6): edeb53f3(x126)
+[i] 2025-10-17: qubic labeled 126/662
+[✔] appended 662 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 662 rows (before dedup) for 2025-10-17 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2969 | already_in_csv=2965 | new_targets=4
+[progress] 4/4 done | kept=3 skipped(no extra)=1 | elapsed=1.7s ETA=0.0s
+[✔] Appended 3 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 55938 (unique heights: 55938)
+[i] orphan rows (raw): 2968; filtered(>= 2025-07-01) kept: 2943
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 58850)
+[i] 2025-10-18: heights 3523898..3524656 (759 blocks)
+[i] 2025-10-18: progress 50/759 (height 3523947)
+[i] 2025-10-18: progress 100/759 (height 3523997)
+[i] 2025-10-18: progress 150/759 (height 3524047)
+[i] 2025-10-18: progress 200/759 (height 3524097)
+[i] 2025-10-18: progress 250/759 (height 3524147)
+[i] 2025-10-18: progress 300/759 (height 3524197)
+[i] 2025-10-18: progress 350/759 (height 3524247)
+[i] 2025-10-18: progress 400/759 (height 3524297)
+[i] 2025-10-18: progress 450/759 (height 3524347)
+[i] 2025-10-18: progress 500/759 (height 3524397)
+[i] 2025-10-18: progress 550/759 (height 3524447)
+[i] 2025-10-18: progress 600/759 (height 3524497)
+[i] 2025-10-18: progress 650/759 (height 3524547)
+[i] 2025-10-18: progress 700/759 (height 3524597)
+[i] 2025-10-18: progress 750/759 (height 3524647)
+[i] 2025-10-18: progress 759/759 (height 3524656)
+[i] 2025-10-18: Accepted markers (>= 6): edeb53f3(x151)
+[i] 2025-10-18: Unknown markers (<= 5): 24bfa4b6(x1)
+[i] 2025-10-18: qubic labeled 151/759
+[✔] appended 759 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 759 rows (before dedup) for 2025-10-18 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2973 | already_in_csv=2968 | new_targets=5
+[progress] 5/5 done | kept=4 skipped(no extra)=1 | elapsed=1.7s ETA=0.0s
+[✔] Appended 4 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 56697 (unique heights: 56697)
+[i] orphan rows (raw): 2972; filtered(>= 2025-07-01) kept: 2947
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 59613)
+[i] 2025-10-19: heights 3524657..3525319 (663 blocks)
+[i] 2025-10-19: progress 50/663 (height 3524706)
+[i] 2025-10-19: progress 100/663 (height 3524756)
+[i] 2025-10-19: progress 150/663 (height 3524806)
+[i] 2025-10-19: progress 200/663 (height 3524856)
+[i] 2025-10-19: progress 250/663 (height 3524906)
+[i] 2025-10-19: progress 300/663 (height 3524956)
+[i] 2025-10-19: progress 350/663 (height 3525006)
+[i] 2025-10-19: progress 400/663 (height 3525056)
+[i] 2025-10-19: progress 450/663 (height 3525106)
+[i] 2025-10-19: progress 500/663 (height 3525156)
+[i] 2025-10-19: progress 550/663 (height 3525206)
+[i] 2025-10-19: progress 600/663 (height 3525256)
+[i] 2025-10-19: progress 650/663 (height 3525306)
+[i] 2025-10-19: progress 663/663 (height 3525319)
+[i] 2025-10-19: Accepted markers (>= 6): edeb53f3(x120)
+[i] 2025-10-19: qubic labeled 120/663
+[✔] appended 663 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 663 rows (before dedup) for 2025-10-19 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2974 | already_in_csv=2972 | new_targets=2
+[progress] 2/2 done | kept=1 skipped(no extra)=1 | elapsed=1.6s ETA=0.0s
+[✔] Appended 1 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 57360 (unique heights: 57360)
+[i] orphan rows (raw): 2973; filtered(>= 2025-07-01) kept: 2948
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 60277)
+[i] 2025-10-20: heights 3525320..3526084 (765 blocks)
+[i] 2025-10-20: progress 50/765 (height 3525369)
+[i] 2025-10-20: progress 100/765 (height 3525419)
+[i] 2025-10-20: progress 150/765 (height 3525469)
+[i] 2025-10-20: progress 200/765 (height 3525519)
+[i] 2025-10-20: progress 250/765 (height 3525569)
+[i] 2025-10-20: progress 300/765 (height 3525619)
+[i] 2025-10-20: progress 350/765 (height 3525669)
+[i] 2025-10-20: progress 400/765 (height 3525719)
+[i] 2025-10-20: progress 450/765 (height 3525769)
+[i] 2025-10-20: progress 500/765 (height 3525819)
+[i] 2025-10-20: progress 550/765 (height 3525869)
+[i] 2025-10-20: progress 600/765 (height 3525919)
+[i] 2025-10-20: progress 650/765 (height 3525969)
+[i] 2025-10-20: progress 700/765 (height 3526019)
+[i] 2025-10-20: progress 750/765 (height 3526069)
+[i] 2025-10-20: progress 765/765 (height 3526084)
+[i] 2025-10-20: Accepted markers (>= 6): edeb53f3(x130)
+[i] 2025-10-20: Unknown markers (<= 5): b6927aa4(x1)
+[i] 2025-10-20: qubic labeled 130/765
+[✔] appended 765 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 765 rows (before dedup) for 2025-10-20 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2974 | already_in_csv=2973 | new_targets=1
+[progress] 1/1 done | kept=0 skipped(no extra)=1 | elapsed=1.3s ETA=0.0s
+[i] No rows to append (no extra nonce found among new hashes).
+[i] main rows: 58125 (unique heights: 58125)
+[i] orphan rows (raw): 2973; filtered(>= 2025-07-01) kept: 2948
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 61042)
+[i] 2025-10-21: heights 3526085..3526762 (678 blocks)
+[i] 2025-10-21: progress 50/678 (height 3526134)
+[i] 2025-10-21: progress 100/678 (height 3526184)
+[i] 2025-10-21: progress 150/678 (height 3526234)
+[i] 2025-10-21: progress 200/678 (height 3526284)
+[i] 2025-10-21: progress 250/678 (height 3526334)
+[i] 2025-10-21: progress 300/678 (height 3526384)
+[i] 2025-10-21: progress 350/678 (height 3526434)
+[i] 2025-10-21: progress 400/678 (height 3526484)
+[i] 2025-10-21: progress 450/678 (height 3526534)
+[i] 2025-10-21: progress 500/678 (height 3526584)
+[i] 2025-10-21: progress 550/678 (height 3526634)
+[i] 2025-10-21: progress 600/678 (height 3526684)
+[i] 2025-10-21: progress 650/678 (height 3526734)
+[i] 2025-10-21: progress 678/678 (height 3526762)
+[i] 2025-10-21: Accepted markers (>= 6): edeb53f3(x54)
+[i] 2025-10-21: Unknown markers (<= 5): e2a47fd3(x1)
+[i] 2025-10-21: qubic labeled 54/678
+[✔] appended 678 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 678 rows (before dedup) for 2025-10-21 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2975 | already_in_csv=2973 | new_targets=2
+[progress] 2/2 done | kept=1 skipped(no extra)=1 | elapsed=1.6s ETA=0.0s
+[✔] Appended 1 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 58803 (unique heights: 58803)
+[i] orphan rows (raw): 2974; filtered(>= 2025-07-01) kept: 2949
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 61721)
+[i] 2025-10-22: heights 3526763..3527453 (691 blocks)
+[i] 2025-10-22: progress 50/691 (height 3526812)
+[i] 2025-10-22: progress 100/691 (height 3526862)
+[i] 2025-10-22: progress 150/691 (height 3526912)
+[i] 2025-10-22: progress 200/691 (height 3526962)
+[i] 2025-10-22: progress 250/691 (height 3527012)
+[i] 2025-10-22: progress 300/691 (height 3527062)
+[i] 2025-10-22: progress 350/691 (height 3527112)
+[i] 2025-10-22: progress 400/691 (height 3527162)
+[i] 2025-10-22: progress 450/691 (height 3527212)
+[i] 2025-10-22: progress 500/691 (height 3527262)
+[i] 2025-10-22: progress 550/691 (height 3527312)
+[i] 2025-10-22: progress 600/691 (height 3527362)
+[i] 2025-10-22: progress 650/691 (height 3527412)
+[i] 2025-10-22: progress 691/691 (height 3527453)
+[i] 2025-10-22: Accepted markers (>= 6): 1c5cbfad(x38)
+[i] 2025-10-22: qubic labeled 38/691
+[✔] appended 691 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 691 rows (before dedup) for 2025-10-22 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2976 | already_in_csv=2974 | new_targets=2
+[progress] 2/2 done | kept=1 skipped(no extra)=1 | elapsed=1.7s ETA=0.0s
+[✔] Appended 1 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 59494 (unique heights: 59494)
+[i] orphan rows (raw): 2975; filtered(>= 2025-07-01) kept: 2950
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 62413)
+[i] 2025-10-23: heights 3527454..3528180 (727 blocks)
+[i] 2025-10-23: progress 50/727 (height 3527503)
+[i] 2025-10-23: progress 100/727 (height 3527553)
+[i] 2025-10-23: progress 150/727 (height 3527603)
+[i] 2025-10-23: progress 200/727 (height 3527653)
+[i] 2025-10-23: progress 250/727 (height 3527703)
+[i] 2025-10-23: progress 300/727 (height 3527753)
+[i] 2025-10-23: progress 350/727 (height 3527803)
+[i] 2025-10-23: progress 400/727 (height 3527853)
+[i] 2025-10-23: progress 450/727 (height 3527903)
+[i] 2025-10-23: progress 500/727 (height 3527953)
+[i] 2025-10-23: progress 550/727 (height 3528003)
+[i] 2025-10-23: progress 600/727 (height 3528053)
+[i] 2025-10-23: progress 650/727 (height 3528103)
+[i] 2025-10-23: progress 700/727 (height 3528153)
+[i] 2025-10-23: progress 727/727 (height 3528180)
+[i] 2025-10-23: Accepted markers (>= 6): 1c5cbfad(x135)
+[i] 2025-10-23: qubic labeled 135/727
+[✔] appended 727 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 727 rows (before dedup) for 2025-10-23 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2977 | already_in_csv=2975 | new_targets=2
+[progress] 2/2 done | kept=1 skipped(no extra)=1 | elapsed=1.6s ETA=0.0s
+[✔] Appended 1 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 60221 (unique heights: 60221)
+[i] orphan rows (raw): 2976; filtered(>= 2025-07-01) kept: 2951
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 63141)
+[i] 2025-10-24: heights 3528181..3528919 (739 blocks)
+[i] 2025-10-24: progress 50/739 (height 3528230)
+[i] 2025-10-24: progress 100/739 (height 3528280)
+[i] 2025-10-24: progress 150/739 (height 3528330)
+[i] 2025-10-24: progress 200/739 (height 3528380)
+[i] 2025-10-24: progress 250/739 (height 3528430)
+[i] 2025-10-24: progress 300/739 (height 3528480)
+[i] 2025-10-24: progress 350/739 (height 3528530)
+[i] 2025-10-24: progress 400/739 (height 3528580)
+[i] 2025-10-24: progress 450/739 (height 3528630)
+[i] 2025-10-24: progress 500/739 (height 3528680)
+[i] 2025-10-24: progress 550/739 (height 3528730)
+[i] 2025-10-24: progress 600/739 (height 3528780)
+[i] 2025-10-24: progress 650/739 (height 3528830)
+[i] 2025-10-24: progress 700/739 (height 3528880)
+[i] 2025-10-24: progress 739/739 (height 3528919)
+[i] 2025-10-24: Accepted markers (>= 6): 1c5cbfad(x131)
+[i] 2025-10-24: qubic labeled 131/739
+[✔] appended 739 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 739 rows (before dedup) for 2025-10-24 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2978 | already_in_csv=2976 | new_targets=2
+[progress] 2/2 done | kept=1 skipped(no extra)=1 | elapsed=2.0s ETA=0.0s
+[✔] Appended 1 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 60960 (unique heights: 60960)
+[i] orphan rows (raw): 2977; filtered(>= 2025-07-01) kept: 2952
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 63881)
+[i] 2025-10-25: heights 3528920..3529671 (752 blocks)
+[i] 2025-10-25: progress 50/752 (height 3528969)
+[i] 2025-10-25: progress 100/752 (height 3529019)
+[i] 2025-10-25: progress 150/752 (height 3529069)
+[i] 2025-10-25: progress 200/752 (height 3529119)
+[i] 2025-10-25: progress 250/752 (height 3529169)
+[i] 2025-10-25: progress 300/752 (height 3529219)
+[i] 2025-10-25: progress 350/752 (height 3529269)
+[i] 2025-10-25: progress 400/752 (height 3529319)
+[i] 2025-10-25: progress 450/752 (height 3529369)
+[i] 2025-10-25: progress 500/752 (height 3529419)
+[i] 2025-10-25: progress 550/752 (height 3529469)
+[i] 2025-10-25: progress 600/752 (height 3529519)
+[i] 2025-10-25: progress 650/752 (height 3529569)
+[i] 2025-10-25: progress 700/752 (height 3529619)
+[i] 2025-10-25: progress 750/752 (height 3529669)
+[i] 2025-10-25: progress 752/752 (height 3529671)
+[i] 2025-10-25: Accepted markers (>= 6): 1c5cbfad(x132)
+[i] 2025-10-25: Unknown markers (<= 5): 01556515(x1)
+[i] 2025-10-25: qubic labeled 132/752
+[✔] appended 752 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 752 rows (before dedup) for 2025-10-25 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2979 | already_in_csv=2977 | new_targets=2
+[progress] 2/2 done | kept=1 skipped(no extra)=1 | elapsed=1.6s ETA=0.0s
+[✔] Appended 1 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 61712 (unique heights: 61712)
+[i] orphan rows (raw): 2978; filtered(>= 2025-07-01) kept: 2953
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 64634)
+[i] 2025-10-26: heights 3529672..3530345 (674 blocks)
+[i] 2025-10-26: progress 50/674 (height 3529721)
+[i] 2025-10-26: progress 100/674 (height 3529771)
+[i] 2025-10-26: progress 150/674 (height 3529821)
+[i] 2025-10-26: progress 200/674 (height 3529871)
+[i] 2025-10-26: progress 250/674 (height 3529921)
+[i] 2025-10-26: progress 300/674 (height 3529971)
+[i] 2025-10-26: progress 350/674 (height 3530021)
+[i] 2025-10-26: progress 400/674 (height 3530071)
+[i] 2025-10-26: progress 450/674 (height 3530121)
+[i] 2025-10-26: progress 500/674 (height 3530171)
+[i] 2025-10-26: progress 550/674 (height 3530221)
+[i] 2025-10-26: progress 600/674 (height 3530271)
+[i] 2025-10-26: progress 650/674 (height 3530321)
+[i] 2025-10-26: progress 674/674 (height 3530345)
+[i] 2025-10-26: Accepted markers (>= 6): 1c5cbfad(x131)
+[i] 2025-10-26: qubic labeled 131/674
+[✔] appended 674 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 674 rows (before dedup) for 2025-10-26 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2980 | already_in_csv=2978 | new_targets=2
+[progress] 2/2 done | kept=1 skipped(no extra)=1 | elapsed=1.3s ETA=0.0s
+[✔] Appended 1 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 62386 (unique heights: 62386)
+[i] orphan rows (raw): 2979; filtered(>= 2025-07-01) kept: 2954
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 65309)
+[i] 2025-10-27: heights 3530346..3531153 (808 blocks)
+[i] 2025-10-27: progress 50/808 (height 3530395)
+[i] 2025-10-27: progress 100/808 (height 3530445)
+[i] 2025-10-27: progress 150/808 (height 3530495)
+[i] 2025-10-27: progress 200/808 (height 3530545)
+[i] 2025-10-27: progress 250/808 (height 3530595)
+[i] 2025-10-27: progress 300/808 (height 3530645)
+[i] 2025-10-27: progress 350/808 (height 3530695)
+[i] 2025-10-27: progress 400/808 (height 3530745)
+[i] 2025-10-27: progress 450/808 (height 3530795)
+[i] 2025-10-27: progress 500/808 (height 3530845)
+[i] 2025-10-27: progress 550/808 (height 3530895)
+[i] 2025-10-27: progress 600/808 (height 3530945)
+[i] 2025-10-27: progress 650/808 (height 3530995)
+[i] 2025-10-27: progress 700/808 (height 3531045)
+[i] 2025-10-27: progress 750/808 (height 3531095)
+[i] 2025-10-27: progress 800/808 (height 3531145)
+[i] 2025-10-27: progress 808/808 (height 3531153)
+[i] 2025-10-27: Accepted markers (>= 6): 1c5cbfad(x149)
+[i] 2025-10-27: Unknown markers (<= 5): bf1b969d(x1), b6927aa4(x1)
+[i] 2025-10-27: qubic labeled 149/808
+[✔] appended 808 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 808 rows (before dedup) for 2025-10-27 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2981 | already_in_csv=2979 | new_targets=2
+[progress] 2/2 done | kept=1 skipped(no extra)=1 | elapsed=1.3s ETA=0.0s
+[✔] Appended 1 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 63194 (unique heights: 63194)
+[i] orphan rows (raw): 2980; filtered(>= 2025-07-01) kept: 2955
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 66118)
+[i] 2025-10-28: heights 3531154..3531798 (645 blocks)
+[i] 2025-10-28: progress 50/645 (height 3531203)
+[i] 2025-10-28: progress 100/645 (height 3531253)
+[i] 2025-10-28: progress 150/645 (height 3531303)
+[i] 2025-10-28: progress 200/645 (height 3531353)
+[i] 2025-10-28: progress 250/645 (height 3531403)
+[i] 2025-10-28: progress 300/645 (height 3531453)
+[i] 2025-10-28: progress 350/645 (height 3531503)
+[i] 2025-10-28: progress 400/645 (height 3531553)
+[i] 2025-10-28: progress 450/645 (height 3531603)
+[i] 2025-10-28: progress 500/645 (height 3531653)
+[i] 2025-10-28: progress 550/645 (height 3531703)
+[i] 2025-10-28: progress 600/645 (height 3531753)
+[i] 2025-10-28: progress 645/645 (height 3531798)
+[i] 2025-10-28: Accepted markers (>= 6): 1c5cbfad(x45)
+[i] 2025-10-28: Unknown markers (<= 5): b6927aa4(x1)
+[i] 2025-10-28: qubic labeled 45/645
+[✔] appended 645 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 645 rows (before dedup) for 2025-10-28 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2982 | already_in_csv=2980 | new_targets=2
+[progress] 2/2 done | kept=1 skipped(no extra)=1 | elapsed=1.6s ETA=0.0s
+[✔] Appended 1 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 63839 (unique heights: 63839)
+[i] orphan rows (raw): 2981; filtered(>= 2025-07-01) kept: 2956
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 66764)
+[i] 2025-10-29: heights 3531799..3532563 (765 blocks)
+[i] 2025-10-29: progress 50/765 (height 3531848)
+[i] 2025-10-29: progress 100/765 (height 3531898)
+[i] 2025-10-29: progress 150/765 (height 3531948)
+[i] 2025-10-29: progress 200/765 (height 3531998)
+[i] 2025-10-29: progress 250/765 (height 3532048)
+[i] 2025-10-29: progress 300/765 (height 3532098)
+[i] 2025-10-29: progress 350/765 (height 3532148)
+[i] 2025-10-29: progress 400/765 (height 3532198)
+[i] 2025-10-29: progress 450/765 (height 3532248)
+[i] 2025-10-29: progress 500/765 (height 3532298)
+[i] 2025-10-29: progress 550/765 (height 3532348)
+[i] 2025-10-29: progress 600/765 (height 3532398)
+[i] 2025-10-29: progress 650/765 (height 3532448)
+[i] 2025-10-29: progress 700/765 (height 3532498)
+[i] 2025-10-29: progress 750/765 (height 3532548)
+[i] 2025-10-29: progress 765/765 (height 3532563)
+[i] 2025-10-29: Accepted markers (>= 6): 212a5ba6(x50)
+[i] 2025-10-29: Unknown markers (<= 5): b6927aa4(x1)
+[i] 2025-10-29: qubic labeled 50/765
+[✔] appended 765 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 765 rows (before dedup) for 2025-10-29 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2982 | already_in_csv=2981 | new_targets=1
+[progress] 1/1 done | kept=0 skipped(no extra)=1 | elapsed=1.3s ETA=0.0s
+[i] No rows to append (no extra nonce found among new hashes).
+[i] main rows: 64604 (unique heights: 64604)
+[i] orphan rows (raw): 2981; filtered(>= 2025-07-01) kept: 2956
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 67529)
+[i] 2025-10-30: heights 3532564..3533249 (686 blocks)
+[i] 2025-10-30: progress 50/686 (height 3532613)
+[i] 2025-10-30: progress 100/686 (height 3532663)
+[i] 2025-10-30: progress 150/686 (height 3532713)
+[i] 2025-10-30: progress 200/686 (height 3532763)
+[i] 2025-10-30: progress 250/686 (height 3532813)
+[i] 2025-10-30: progress 300/686 (height 3532863)
+[i] 2025-10-30: progress 350/686 (height 3532913)
+[i] 2025-10-30: progress 400/686 (height 3532963)
+[i] 2025-10-30: progress 450/686 (height 3533013)
+[i] 2025-10-30: progress 500/686 (height 3533063)
+[i] 2025-10-30: progress 550/686 (height 3533113)
+[i] 2025-10-30: progress 600/686 (height 3533163)
+[i] 2025-10-30: progress 650/686 (height 3533213)
+[i] 2025-10-30: progress 686/686 (height 3533249)
+[i] 2025-10-30: Accepted markers (>= 6): 212a5ba6(x132)
+[i] 2025-10-30: qubic labeled 132/686
+[✔] appended 686 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 686 rows (before dedup) for 2025-10-30 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2982 | already_in_csv=2981 | new_targets=1
+[progress] 1/1 done | kept=0 skipped(no extra)=1 | elapsed=1.3s ETA=0.0s
+[i] No rows to append (no extra nonce found among new hashes).
+[i] main rows: 65290 (unique heights: 65290)
+[i] orphan rows (raw): 2981; filtered(>= 2025-07-01) kept: 2956
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 68215)
+[i] 2025-10-31: heights 3533250..3533987 (738 blocks)
+[i] 2025-10-31: progress 50/738 (height 3533299)
+[i] 2025-10-31: progress 100/738 (height 3533349)
+[i] 2025-10-31: progress 150/738 (height 3533399)
+[i] 2025-10-31: progress 200/738 (height 3533449)
+[i] 2025-10-31: progress 250/738 (height 3533499)
+[i] 2025-10-31: progress 300/738 (height 3533549)
+[i] 2025-10-31: progress 350/738 (height 3533599)
+[i] 2025-10-31: progress 400/738 (height 3533649)
+[i] 2025-10-31: progress 450/738 (height 3533699)
+[i] 2025-10-31: progress 500/738 (height 3533749)
+[i] 2025-10-31: progress 550/738 (height 3533799)
+[i] 2025-10-31: progress 600/738 (height 3533849)
+[i] 2025-10-31: progress 650/738 (height 3533899)
+[i] 2025-10-31: progress 700/738 (height 3533949)
+[i] 2025-10-31: progress 738/738 (height 3533987)
+[i] 2025-10-31: Accepted markers (>= 6): 212a5ba6(x157)
+[i] 2025-10-31: qubic labeled 157/738
+[✔] appended 738 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 738 rows (before dedup) for 2025-10-31 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2983 | already_in_csv=2981 | new_targets=2
+[progress] 2/2 done | kept=1 skipped(no extra)=1 | elapsed=1.6s ETA=0.0s
+[✔] Appended 1 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 66028 (unique heights: 66028)
+[i] orphan rows (raw): 2982; filtered(>= 2025-07-01) kept: 2957
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 68954)
+[i] 2025-11-01: heights 3533988..3534746 (759 blocks)
+[i] 2025-11-01: progress 50/759 (height 3534037)
+[i] 2025-11-01: progress 100/759 (height 3534087)
+[i] 2025-11-01: progress 150/759 (height 3534137)
+[i] 2025-11-01: progress 200/759 (height 3534187)
+[i] 2025-11-01: progress 250/759 (height 3534237)
+[i] 2025-11-01: progress 300/759 (height 3534287)
+[i] 2025-11-01: progress 350/759 (height 3534337)
+[i] 2025-11-01: progress 400/759 (height 3534387)
+[i] 2025-11-01: progress 450/759 (height 3534437)
+[i] 2025-11-01: progress 500/759 (height 3534487)
+[i] 2025-11-01: progress 550/759 (height 3534537)
+[i] 2025-11-01: progress 600/759 (height 3534587)
+[i] 2025-11-01: progress 650/759 (height 3534637)
+[i] 2025-11-01: progress 700/759 (height 3534687)
+[i] 2025-11-01: progress 750/759 (height 3534737)
+[i] 2025-11-01: progress 759/759 (height 3534746)
+[i] 2025-11-01: Accepted markers (>= 6): 212a5ba6(x142)
+[i] 2025-11-01: Unknown markers (<= 5): b6927aa4(x1)
+[i] 2025-11-01: qubic labeled 142/759
+[✔] appended 759 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 759 rows (before dedup) for 2025-11-01 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2985 | already_in_csv=2982 | new_targets=3
+[progress] 3/3 done | kept=2 skipped(no extra)=1 | elapsed=1.3s ETA=0.0s
+[✔] Appended 2 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 66787 (unique heights: 66787)
+[i] orphan rows (raw): 2984; filtered(>= 2025-07-01) kept: 2959
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 69715)
+[i] 2025-11-02: heights 3534747..3535438 (692 blocks)
+[i] 2025-11-02: progress 50/692 (height 3534796)
+[i] 2025-11-02: progress 100/692 (height 3534846)
+[i] 2025-11-02: progress 150/692 (height 3534896)
+[i] 2025-11-02: progress 200/692 (height 3534946)
+[i] 2025-11-02: progress 250/692 (height 3534996)
+[i] 2025-11-02: progress 300/692 (height 3535046)
+[i] 2025-11-02: progress 350/692 (height 3535096)
+[i] 2025-11-02: progress 400/692 (height 3535146)
+[i] 2025-11-02: progress 450/692 (height 3535196)
+[i] 2025-11-02: progress 500/692 (height 3535246)
+[i] 2025-11-02: progress 550/692 (height 3535296)
+[i] 2025-11-02: progress 600/692 (height 3535346)
+[i] 2025-11-02: progress 650/692 (height 3535396)
+[i] 2025-11-02: progress 692/692 (height 3535438)
+[i] 2025-11-02: Accepted markers (>= 6): 212a5ba6(x129)
+[i] 2025-11-02: Unknown markers (<= 5): b6927aa4(x2)
+[i] 2025-11-02: qubic labeled 129/692
+[✔] appended 692 new rows (deduped) to /home/ubuntu/web3/count_qubic/mainchain.csv
+[✔] Appended day summary into: /home/ubuntu/web3/count_qubic/summaries/qubic_summary_all.txt
+[✔] Appended 692 rows (before dedup) for 2025-11-02 to /home/ubuntu/web3/count_qubic/mainchain.csv
+[i] fetched=2986 | already_in_csv=2984 | new_targets=2
+[progress] 2/2 done | kept=1 skipped(no extra)=1 | elapsed=1.6s ETA=0.0s
+[✔] Appended 1 new rows with extra nonce into /home/ubuntu/web3/count_qubic/orphan.csv
+[i] main rows: 67479 (unique heights: 67479)
+[i] orphan rows (raw): 2985; filtered(>= 2025-07-01) kept: 2960
+[i] orphan rows skipped due to date filter: 25
+[✔] Wrote merged CSV -> /home/ubuntu/web3/count_qubic/merge.csv (rows: 70408)

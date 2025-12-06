@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Qubic's Selfish Mining on Monero — Dashboard & Overview</title>
+  <style>
+    :root{
+      --bg:#ffffff; --fg:#111827; --muted:#6b7280; --border:#e5e7eb;
+      --accent:#3730a3; --accent-weak:#eef2ff; --card:#ffffff;
+      --green:#0f7a3a; --red:#c62828;
+    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#0b0f17; --fg:#e5e7eb; --muted:#9aa4b2; --border:#223047;
+        --accent:#8ea0ff; --accent-weak:#151d2c; --card:#0f1624;
+      }
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0; background:var(--bg); color:var(--fg);
+      font-family: system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    }
+
+    .wrap{width:min(1050px,100%); margin-inline:auto; padding:24px}
+
+    header.hero{padding:10px 0 18px; text-align:center}
+    h1{margin:8px 0 4px 0; font-size:clamp(26px,3.8vw,40px)}
+    .sub{color:var(--muted); font-size:.95rem; margin-top:0}
+
+    .meta-line{
+      margin-top:4px;
+      font-size:0.98rem;
+    }
+    .meta-line strong{
+      font-weight:700;
+    }
+    .meta-paper{
+      font-size:1rem;
+    }
+    .meta-paper a{
+      color:var(--accent);
+      text-decoration:none;
+      font-weight:700;
+    }
+    .meta-paper a:hover{
+      text-decoration:underline;
+    }
+
+    .muted{color:var(--muted);}
+
+    nav.toc{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:18px 0 8px}
+    .toc a{
+      text-decoration:none; color:var(--accent); background:var(--accent-weak);
+      border:1px solid transparent; padding:8px 12px; border-radius:999px; font-weight:700;
+    }
+    .toc a:hover{filter:brightness(1.05)}
+
+    section{margin:22px 0; padding:18px; border:1px solid var(--border);
+      background:var(--card); border-radius:16px; box-shadow:0 1px 2px rgba(0,0,0,.05)}
+    section h2{margin:0 0 8px 0; font-size:clamp(18px,2.4vw,22px)}
+    section p{margin:8px 0; color:var(--fg); line-height:1.6}
+
+    .callout{border-left:4px solid var(--green); padding-left:12px; margin:10px 0}
+    .warn{border-left-color:var(--red)}
+
+    .grid{
+      display:grid; gap:16px;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      margin-top:12px;
+    }
+    .card{
+      border:1px solid var(--border); background:var(--card);
+      border-radius:14px; padding:16px; min-height:150px;
+      display:flex; flex-direction:column; justify-content:space-between;
+    }
+    .card h3{margin:0 0 6px 0; font-size:1.05rem}
+    .card p{margin:0 0 10px 0; color:var(--muted); line-height:1.5}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:8px; padding:10px 14px; font-weight:700; border-radius:12px;
+      background:var(--accent-weak); color:var(--accent);
+      text-decoration:none; cursor:pointer; transition:transform .04s ease, background .2s;
+      user-select:none;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn:active{transform:translateY(0)}
+
+    footer{margin:26px 0 8px; text-align:center; color:var(--muted); font-size:.9rem}
+    hr.sep{border:none; border-top:1px dashed var(--border); margin:12px 0}
+    ul{padding-left:18px; margin:8px 0}
+    code{background:var(--accent-weak); padding:2px 6px; border-radius:6px}
+
+    figure.illust{
+      margin:14px 0 4px; padding:10px; border:1px dashed var(--border);
+      background:var(--card); border-radius:12px;
+      text-align:center;
+    }
+    .illust img{
+      display:block;
+      width:60%;
+      height:auto;
+      margin:0 auto;
+      border-radius:10px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.05);
+    }
+    .illust figcaption{
+      margin-top:8px; font-size:.9rem; color:var(--muted); text-align:center;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <h1>Qubic's Selfish Mining on Monero</h1>
+      <div class="sub">
+        A simple overview of what happened and how we analyzed it.
+      </div>
+      <!-- 블록 / Qubic jobs 기간을 따로 명시 -->
+      <div class="meta-line">
+        <strong>Monero block data:</strong> 2025-08-01 → 2025-11-02
+      </div>
+      <div class="meta-line">
+        <strong>Qubic jobs data:</strong> 2025-09-29 → 2025-11-02
+      </div>
+      <div class="meta-line meta-paper">
+        <strong>Paper:</strong>
+        <a href="https://arxiv.org/abs/2512.01437" target="_blank" rel="noopener">
+          Qubic's Selfish Mining on Monero (arXiv:2512.01437)
+        </a>
+      </div>
+
+      <nav class="toc">
+        <a href="#happening">1. What was happening?</a>
+        <a href="#selfish">2. What is Selfish Mining?</a>
+        <a href="#analysis">3. Data / Analysis</a>
+        <a href="#details">4. Details</a>
+      </nav>
+    </header>
+
+    <section id="happening">
+      <h2>1. What was happening?</h2>
+      <p>
+        In late 2025, we began noticing <b>many orphaned blocks</b> appearing on the Monero blockchain.
+        These orphans weren’t random. They seemed to coincide with mining activity coming from
+        <b>Qubic</b>, a project that connects external miners through job notifications.
+      </p>
+      <p>
+        When Qubic miners worked on Monero, their private blocks often conflicted with honest miners.
+        This led to repeated short forks, visible as <b>parallel block runs</b> on our visualizer.
+        At the same time, Qubic claimed <b>very high hashrates (OVER 51%)</b> that didn’t match what the
+        Monero network actually accepted. Qubic suggested that they were mining aggressively, but
+        not always successfully.
+      </p>
+      <div class="callout">
+        <p class="muted">
+          In simple terms, Monero was being “challenged” by Qubic miners.
+        </p>
+      </div>
+    </section>
+
+    <section id="selfish">
+      <h2>2. What is Selfish Mining?</h2>
+      <p>
+        <b>Selfish mining</b> is a strategy where miners don’t immediately share the blocks they find.
+        Instead, they <b>keep their own private chain</b> and release it at just the right moment to
+        outpace everyone else.
+      </p>
+      <p>
+        Normally, when a miner finds a block, they broadcast it to the whole network right away.
+        In selfish mining, the miner keeps it secret, continues building on it privately, and
+        reveals it later, trying to make the public chain’s newest blocks <b>invalid</b>.
+        If their chain turns out longer, the network accepts theirs and discards the honest blocks.
+      </p>
+
+      <figure class="illust">
+        <a href="selfish%20mining.drawio.png" target="_blank" rel="noopener">
+          <img src="selfish%20mining.drawio.png" alt="Illustration explaining selfish mining (private branch vs public chain, timed reveal)" />
+        </a>
+        <figcaption>
+          Selfish mining at a glance : attacker mines a private branch and reveals it to override the public tip.
+          (Click to open full size)
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="analysis">
+      <h2>3. Data / Analysis</h2>
+      <p>
+        To figure out which blocks belonged to Qubic, we looked at <b>patterns in the coinbase
+        transactions</b>. Every mined block has a coinbase, a unique fingerprint of who mined it.
+        Inside that data, there’s a field called <code>extra_nonce</code>.
+      </p>
+      <p>
+        Our dashboard uses a local <code>monerod</code> node and continuously fetches fresh block data via RPC.
+        We then apply our attribution heuristic and overlay <b>Qubic-attributed blocks</b> on
+        <b>Monero’s canonical timeline</b> so you can see where they overlap, compete, or fork away.
+      </p>
+
+      <div class="callout">
+        <p class="muted">
+          Data coverage in this dashboard:
+          Monero blocks from <b>2025-08-01</b> to <b>2025-11-02</b>, and
+          Qubic job notifications from <b>2025-09-29</b> to <b>2025-11-02</b>.
+        </p>
+      </div>
+
+      <h3>How do we know which blocks are Qubic’s?</h3>
+      <p>
+        Monero is privacy-first by default, so you cannot simply “see” the mining pool from the chain.
+        Block rewards are paid via a special coinbase transaction. Some pools later publish a
+        <b>view key</b> so anyone can verify that the reward really belongs to them.
+      </p>
+      <p>
+        Qubic also publishes view keys, but only after each weekly mining epoch ends, via their official
+        Discord. These view keys let us confirm, in hindsight, which main-chain rewards were theirs,
+        but they cannot tell us about brand-new blocks or already-orphaned blocks.
+      </p>
+      <p>
+        To study Qubic’s behavior in real time, we therefore combine two signals:
+        late-published view keys (for ex-post verification) and a distinctive pattern we observe in the
+        <code>extra_nonce</code> field of their coinbase transactions (for real-time attribution). During our
+        study window, blocks later confirmed as Qubic by view keys all followed this same pattern, while
+        ordinary Monero blocks almost never did.
+      </p>
+      <p>
+        In short: view keys validate our labels after the fact, and the extra_nonce pattern lets us
+        track Qubic’s blocks live and include orphaned branches that would otherwise be invisible.
+      </p>
+
+      <div class="callout">
+        <p class="muted">
+          For the full probabilistic model, validation, and attack analysis,
+          see the paper on arXiv:
+          <a href="https://arxiv.org/abs/2512.01437" target="_blank" rel="noopener">
+            Qubic's Selfish Mining on Monero
+          </a>.
+        </p>
+      </div>
+    </section>
+
+    <section id="details">
+      <h2>4. Details</h2>
+      <div class="grid">
+        <article class="card">
+          <div>
+            <h3>Selfish Mining Blocks</h3>
+            <p>Visualizes both Monero and Qubic branches, showing where their blocks collided or diverged.</p>
+          </div>
+          <div><a class="btn" href="/selfish_mining">Open →</a></div>
+        </article>
+
+        <article class="card">
+          <div>
+            <h3>Qubic Job Notify</h3>
+            <p>Shows live Qubic job notifications and how they align with Monero block heights.</p>
+          </div>
+          <div><a class="btn" href="/jobs">Open →</a></div>
+        </article>
+
+        <article class="card">
+          <div>
+            <h3>Monero Blocks</h3>
+            <p>Lists canonical Monero blocks and identifies orphans during Qubic’s activity windows.</p>
+          </div>
+          <div><a class="btn" href="/blocks">Open →</a></div>
+        </article>
+
+        <article class="card">
+          <div>
+            <h3>Qubic Block Count</h3>
+            <p>Aggregates how many Qubic-attributed blocks appeared in each time period.</p>
+          </div>
+          <div><a class="btn" href="/count_qubic">Open →</a></div>
+        </article>
+
+        <article class="card">
+          <div>
+            <h3>Orphan Block Count</h3>
+            <p>Shows how often Monero’s blocks were replaced or orphaned during Qubic’s attacks.</p>
+          </div>
+          <div><a class="btn" href="/count_orphan">Open →</a></div>
+        </article>
+      </div>
+    </section>
+
+    <footer>
+      <span>Made by K-Shield Jr. Project MintChoco</span>
+    </footer>
+  </main>
+</body>
+</html>

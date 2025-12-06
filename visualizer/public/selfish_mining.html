@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Selfish Mining Blocks</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="./nav.css" />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #0b0f14;
+      --muted: #4a5560;
+      --grid: #e8edf2;
+      --main: #ddf2d1;   /* Mainchain (blue) */
+      --qubic: #dafbfa;  /* Qubic (mint) */
+      --orphan: #fcbab1; /* Orphan non-Qubic (red) */
+      --unknown: #94a3b8;
+      --accent: #d4d8dc;
+      --runbg: rgba(14, 165, 233, 0.08);
+      --card: #f8fafc;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin:0; padding:0; background:var(--bg); color:var(--fg);
+      font:14px/1.4 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, sans-serif;
+    }
+
+    header {
+      display:flex; align-items:center; gap:12px; padding:12px 16px;
+      border-bottom:1px solid var(--grid); position:sticky; top:44px;
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.96));
+      backdrop-filter: blur(6px);
+      z-index: 900;
+      white-space: nowrap;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+    header h1 { font-size:18px; margin:0; letter-spacing:.3px; flex:0 0 auto; }
+    .legend { display:flex; gap:12px; align-items:center; margin-left:6px; flex:0 0 auto; }
+    .lg { display:inline-flex; align-items:center; gap:7px; opacity:.9; }
+    .sw { width:14px; height:14px; border-radius:4px; background:var(--unknown); border:1px solid #0002; }
+    .sw.main { background:var(--main); }
+    .sw.orphan { background:var(--orphan); }
+    .sw.qubic { background:var(--qubic); }
+
+    .controls { display:flex; gap:8px; align-items:center; margin-left:auto; flex:0 0 auto; }
+    .pill {
+      display:inline-flex; align-items:center; gap:6px; padding:6px 10px;
+      border:1px solid var(--grid); background:var(--card); border-radius:999px; color:var(--fg);
+    }
+    .pill input[type="number"]{ width:58px; background:transparent; border:none; color:var(--fg); outline:none; }
+    .pill input[type="date"]{ width:140px; background:transparent; border:none; color:var(--fg); outline:none; }
+    .btn { appearance:none; border:none; background:var(--accent); color:#001012; padding:8px 12px; border-radius:10px; font-weight:600; cursor:pointer; flex:0 0 auto; }
+
+    .wrap { padding:18px; }
+    .card {
+      background:var(--card); border:1px solid var(--grid); border-radius:16px;
+      padding:14px; margin-bottom:18px; box-shadow: 0 6px 22px rgba(0,0,0,.06);
+    }
+    .row-title {
+      font-weight:600; color:var(--muted); margin:6px 0 10px;
+      display:flex; align-items:center; gap:10px; justify-content:flex-start;
+    }
+    .row-title .hl{
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 8px;
+      background: #eef2f7;
+      border: 1px solid var(--grid);
+      color: var(--fg);
+      margin-right: 6px;
+    }
+
+    .canvas {
+      width:100%;
+      overflow-x:auto; 
+      overflow-y:hidden;
+      border-radius:12px; border:1px dashed var(--grid);
+      background:linear-gradient(180deg, rgba(0,0,0,.02), transparent 100%);
+      padding:12px;
+    }
+
+    svg { display:block; width:auto !important; height:auto !important; }
+    svg text { font-size: 12px; }
+    .axes text { fill: var(--muted); font-size: 12px; }
+    .sep { height:8px; }
+    .empty { color:var(--muted); padding:28px; text-align:center; }
+    .kbd {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      background:#eef2f7; border:1px solid var(--grid); padding:0 6px; border-radius:6px;
+    }
+
+    .block { cursor: pointer; }
+    .block:hover { transform: translateY(-1px); }
+
+    .tooltip{
+      position: fixed;
+      z-index: 1000;
+      pointer-events: none;
+      opacity: 0;
+      background: #0f172a;
+      color: #e2e8f0;
+      border: 1px solid #1e293b;
+      padding: 10px 12px;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.18);
+      max-width: 360px;
+      font-size: 12px;
+      line-height: 1.5;
+      user-select: none;
+    }
+    .tooltip .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      background:#0b1220; border:1px solid #1e293b; padding:0 6px; border-radius:6px;
+      color:#cde3ff;
+    }
+  </style>
+</head>
+<body>
+  <script src="./nav.js" defer></script>
+
+  <header>
+    <h1>Selfish Mining Blocks</h1>
+    <div class="legend">
+      <span class="lg"><span class="sw main"></span>Mainchain</span>
+      <span class="lg"><span class="sw orphan"></span>Orphan (non-Qubic)</span>
+      <span class="lg"><span class="sw qubic"></span>Qubic</span>
+    </div>
+    <div class="controls">
+      <span class="pill">Min run
+        <input id="minRun" type="number" min="2" step="1" value="3" />
+      </span>
+      <span class="pill">Start
+        <input id="dateStart" type="date" />
+      </span>
+      <span class="pill">End
+        <input id="dateEnd" type="date" />
+      </span>
+      <button id="applyRange" class="btn">Apply</button>
+      <button id="showRecent" class="btn">Recent 10</button>
+      <button id="reload" class="btn">Reload</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div id="container"></div>
+  </div>
+
+  <div id="tooltip" class="tooltip"></div>
+
+  <script src="./selfish_mining.js"></script>
+</body>
+</html>
+
