@@ -90,17 +90,15 @@ def identify_state_transitions(blocks):
 
 
 def calculate_weekly_gamma_with_0_prime_estimation(states_df, blocks_df):
-	"""Calculate weekly gamma values and estimate 0' state counts"""
+	"""Calculate weekly gamma values and estimate 0' state counts using robust logic"""
 	
 	# Add weekly time unit
-	states_df['week'] = states_df['timestamp'].dt.to_period('W-TUE').apply(lambda p: p.start_time.date())
 	blocks_df['week'] = blocks_df['timestamp'].dt.to_period('W-TUE').apply(lambda p: p.start_time.date())
 	
 	results = []
 	
-	for week in states_df['week'].unique():
+	for week in blocks_df['week'].unique():
 		# Filter data for this week
-		week_states = states_df[states_df['week'] == week]
 		week_blocks = blocks_df[blocks_df['week'] == week]
 		
 		# Calculate alpha (Qubic's mining power share)
@@ -108,135 +106,98 @@ def calculate_weekly_gamma_with_0_prime_estimation(states_df, blocks_df):
 		qubic_blocks = len(week_blocks[week_blocks['is_qubic'] == True])
 		alpha = qubic_blocks / total_blocks if total_blocks > 0 else 0
 		
-		# Use the same logic as estimated 0' states for consistency
-		# Find all 0' state situations using the same mathematical conditions
-		valid_0_prime_situations = []
+		# Identify contested heights (Qubic vs Honest)
+		height_counts = week_blocks['height'].value_counts()
+		potential_contested = height_counts[height_counts > 1].index
 		
-		for i, case in week_states[week_states['state'] == 1].iterrows():
-			height = case['height']
+		total_0_prime = 0
+		gamma_opportunities = 0
+		gamma_successes = 0
+		
+		for h in potential_contested:
+			h_blocks = week_blocks[week_blocks['height'] == h]
 			
-			# Get all blocks at this height
-			height_blocks = week_blocks[week_blocks['height'] == height].sort_values('timestamp')
-			qubic_blocks_at_height = height_blocks[height_blocks['is_qubic'] == True]
-			non_qubic_blocks_at_height = height_blocks[height_blocks['is_qubic'] == False]
+			# Check if it's Qubic vs Honest (at least one of each)
+			has_qubic = h_blocks['is_qubic'].any()
+			has_honest = (~h_blocks['is_qubic']).any()
 			
-			# Use the same mathematical conditions as estimated 0' state:
-			# 1. has_orphans = True (len(height_blocks) > 1)
-			# 2. first_qubic['timestamp'] < first_non_qubic['timestamp']
-			# 3. prev_state == 0
-			# 4. transition == "0->1"
-			
-			has_orphans = len(height_blocks) > 1
-			qubic_mined_first = False
-			
-			if len(qubic_blocks_at_height) > 0 and len(non_qubic_blocks_at_height) > 0:
-				first_qubic = qubic_blocks_at_height.iloc[0]
-				first_non_qubic = non_qubic_blocks_at_height.iloc[0]
-				qubic_mined_first = first_qubic['timestamp'] < first_non_qubic['timestamp']
-			
-			prev_state_0 = case['prev_state'] == 0
-			transition_0_to_1 = case['transition'] == "0->1"
-			
-			# All conditions must be true for 0' state
-			if has_orphans and qubic_mined_first and prev_state_0 and transition_0_to_1:
-				# Check if Qubic's block is on main chain
-				qubic_block_from_contested_height = qubic_blocks_at_height.iloc[0]
-				qubic_wins = not qubic_block_from_contested_height['is_orphan']
+			if has_qubic and has_honest:
+				# 1. Check if it ended as 2:1 (Next block exists)
+				next_h = h + 1
+				next_blocks = blocks_df[blocks_df['height'] == next_h]
+				main_next = next_blocks[next_blocks['is_orphan'] == False]
 				
-				# Check if Qubic mined the next block (for gamma calculation)
-				next_height = height + 1
-				next_height_blocks = week_blocks[week_blocks['height'] == next_height].sort_values('timestamp')
-				qubic_main_next = len(next_height_blocks[(next_height_blocks['is_qubic'] == True) & (next_height_blocks['is_orphan'] == False)])
-				qubic_mined_next = qubic_main_next > 0
+				if len(main_next) == 0:
+					continue # Not a resolved 2:1 case, skip.
+
+				next_block = main_next.iloc[0]
 				
-				valid_0_prime_situations.append({
-					'height': height,
-					'timestamp': case['timestamp'],
-					'state': case['state'],
-					'transition': case['transition'],
-					'is_orphan': case['is_orphan'],
-					'block_hash': case['block_hash'],
-					'qubic_wins': qubic_wins,
-					'qubic_mined_next': qubic_mined_next,
-					'competition_resolved': True
-				})
-		
-		valid_0_prime_df = pd.DataFrame(valid_0_prime_situations)
-		
-		# Calculate gamma: Qubic's block is on main chain AND Qubic did NOT mine the next block
-		if len(valid_0_prime_df) > 0:
-			gamma_cases = valid_0_prime_df[(valid_0_prime_df['qubic_wins'] == True) & (valid_0_prime_df['qubic_mined_next'] == False)]
-		else:
-			gamma_cases = pd.DataFrame()
+				# 2. Determine if it's a valid Race (State 0')
+				# Default is True (Honest winning is always a Race)
+				is_race = True
+				
+				if next_block['is_qubic']:
+					# Qubic won (Qubic H -> Qubic H+1). 
+					# Check for State 2: Did Qubic find H+1 BEFORE Honest found H?
+					honest_block_at_h = h_blocks[h_blocks['is_qubic'] == False].iloc[0]
+					if next_block['timestamp'] < honest_block_at_h['timestamp']:
+						is_race = False # State 2 (Already had H+1), not a Race.
+				
+				if is_race:
+					total_0_prime += 1
+					
+					# Calculate Gamma
+					# Gamma is the probability Honest miners choose Qubic's block
+					# We look at cases where the NEXT block is Honest
+					if not next_block['is_qubic']:
+						gamma_opportunities += 1
+						
+						# Did it extend Qubic?
+						# If Qubic block at H is NOT orphan, then it was extended.
+						qubic_block_at_h = h_blocks[h_blocks['is_qubic'] == True].iloc[0]
+						if not qubic_block_at_h['is_orphan']:
+							gamma_successes += 1
 		
 		# Calculate gamma rate
-		total_0_prime = len(valid_0_prime_df)
-		gamma_successes = len(gamma_cases)
-		gamma_rate = gamma_successes / total_0_prime if total_0_prime > 0 else 0
-		
-		# Estimate 0' state count using mathematical conditions
-		# 0' state estimation: Qubic mined first AND there are orphans AND prev_state == 0
-		estimated_0_prime_count = 0
-		
-		for i, case in week_states[week_states['state'] == 1].iterrows():
-			height = case['height']
-			
-			# Get all blocks at this height
-			height_blocks = week_blocks[week_blocks['height'] == height].sort_values('timestamp')
-			qubic_blocks_at_height = height_blocks[height_blocks['is_qubic'] == True]
-			non_qubic_blocks_at_height = height_blocks[height_blocks['is_qubic'] == False]
-			
-			# Mathematical conditions for 0' state:
-			# 1. has_orphans = True (len(height_blocks) > 1)
-			# 2. first_qubic['timestamp'] < first_non_qubic['timestamp']
-			# 3. prev_state == 0
-			# 4. transition == "0->1"
-			
-			has_orphans = len(height_blocks) > 1
-			qubic_mined_first = False
-			
-			if len(qubic_blocks_at_height) > 0 and len(non_qubic_blocks_at_height) > 0:
-				first_qubic = qubic_blocks_at_height.iloc[0]
-				first_non_qubic = non_qubic_blocks_at_height.iloc[0]
-				qubic_mined_first = first_qubic['timestamp'] < first_non_qubic['timestamp']
-			
-			prev_state_0 = case['prev_state'] == 0
-			transition_0_to_1 = case['transition'] == "0->1"
-			
-			# All conditions must be true for 0' state
-			if has_orphans and qubic_mined_first and prev_state_0 and transition_0_to_1:
-				estimated_0_prime_count += 1
+		# Gamma = P(Honest extends Qubic | Honest finds next)
+		gamma_rate = gamma_successes / gamma_opportunities if gamma_opportunities > 0 else 0
 		
 		results.append({
 			'week': week,
 			'alpha': alpha,
 			'gamma': gamma_rate,
-			'total_0_prime': total_0_prime,
+			'total_0_prime': total_0_prime, # This is the count of ALL races
 			'gamma_successes': gamma_successes,
-			'estimated_0_prime_count': estimated_0_prime_count,
+			'estimated_0_prime_count': total_0_prime,
 			'blocks': len(week_blocks)
 		})
 	
 	return pd.DataFrame(results)
 
 
-def create_weekly_dual_axis_chart(weekly_df):
+def create_weekly_dual_axis_chart(weekly_stats):
 	"""Create weekly chart with dual y-axis showing gamma and 0' state counts"""
 	fig, ax1 = plt.subplots(figsize=(10, 6))
 	
 	# Convert week to string for better x-axis display
-	weekly_df['week_str'] = weekly_df['week'].astype(str)
+	weekly_stats['week_str'] = weekly_stats['week'].astype(str)
 	
 	# Create bars for 0' state counts (left y-axis)
-	bars = ax1.bar(weekly_df['week_str'], weekly_df['estimated_0_prime_count'], width=0.7,
+	bars = ax1.bar(weekly_stats['week_str'], weekly_stats['estimated_0_prime_count'], width=0.7,
 				   alpha=0.7, color='lightgray', edgecolor='black', linewidth=1, label='Estimated 0\' State Count')
 	ax1.set_xlabel('Week', fontsize=18)
 	ax1.set_ylabel('Estimated 0\' State Count', fontsize=18)
 	ax1.tick_params(axis='x', rotation=45)
 	
-	# Create line for gamma values (right y-axis)
+	# Create a second y-axis for Gamma Rate
 	ax2 = ax1.twinx()
-	line = ax2.plot(weekly_df['week_str'], weekly_df['gamma'], 'ro-', linewidth=2, markersize=6, label='γ Rate')
+	
+	# Filter for valid gamma points (Min 10 races)
+	MIN_RACES = 10
+	valid_gamma_stats = weekly_stats[weekly_stats['total_0_prime'] >= MIN_RACES]
+	
+	# Plot Gamma Line only for valid points
+	line = ax2.plot(valid_gamma_stats['week_str'], valid_gamma_stats['gamma'], 'ro-', linewidth=2, markersize=6, label='γ Rate')
 	ax2.set_ylabel('γ Rate', fontsize=18)
 	ax2.set_ylim(-0.01, 0.2)  # Set y-axis range with slight offset from 0 for better visibility
 
@@ -248,10 +209,13 @@ def create_weekly_dual_axis_chart(weekly_df):
 	ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper right', fontsize=15)
 	
 	# Add value labels on gamma line only (with larger font)
-	for i, (week, gamma) in enumerate(zip(weekly_df['week_str'], weekly_df['gamma'])):
+	for i, row in valid_gamma_stats.iterrows():
+		# Find the index in the original dataframe to get the correct x-position
+		idx = weekly_stats.index.get_loc(i)
+		gamma = row['gamma']
 		if not pd.isna(gamma) and gamma > 0:
 			# Position gamma values slightly above the line for better visibility
-			ax2.text(i, gamma + 0.005, f'{gamma:.3f}', ha='center', va='bottom', 
+			ax2.text(idx, gamma + 0.005, f'{gamma:.3f}', ha='center', va='bottom', 
 					fontsize=10, fontweight='bold')
 	
 	plt.tight_layout()

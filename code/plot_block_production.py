@@ -163,14 +163,16 @@ def analyze_qubic_mining():
     # ===== Figure 1: Power share lines =====
     fig1, ax1 = plt.subplots(1, 1, figsize=(15, 6))
 
+    ax1.plot(hourly_df['hour'], hourly_df['qubic_power_ratio'],
+             linewidth=1, color='darkgray', alpha=0.7, label='Hourly Mining Power Share')
+
     ax1.plot(daily_df['date'], daily_df['qubic_power_ratio'],
              marker='o', linewidth=2, markersize=4, color='red', label='Daily Mining Power Share')
 
     ax1.plot(weekly_df['week_end'], weekly_df['qubic_power_ratio'],
              marker='s', linewidth=2, markersize=6, color='blue', label='Weekly Mining Power Share')
 
-    ax1.plot(hourly_df['hour'], hourly_df['qubic_power_ratio'],
-             linewidth=1, color='seagreen', alpha=0.7, label='Hourly Mining Power Share')
+
 
     ax1.axhline(y=qubic_power_overall, color='black', linestyle='--', linewidth=2,
                 label=f'Overall Average ({qubic_power_overall:.2f}%)')
