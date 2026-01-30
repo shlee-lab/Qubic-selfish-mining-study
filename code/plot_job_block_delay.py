@@ -1,12 +1,17 @@
 import os
 import pandas as pd
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from datetime import datetime
 
 # Font settings for better display
 plt.rcParams['font.family'] = 'DejaVu Sans'
 plt.rcParams['axes.unicode_minus'] = False
+
+# Use SHOW_PLOTS=1 for interactive windows
+SHOW_PLOTS = os.environ.get("SHOW_PLOTS", "").strip() in {"1", "true", "TRUE", "yes", "YES"}
 
 def calculate_job_fetch_period(jobs_df):
     """
@@ -221,7 +226,8 @@ def plot_delay_distribution(delays, job_fetch_mean, job_fetch_std, output_path):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     plt.savefig(output_path, bbox_inches='tight', dpi=300)
     print(f"Saved plot to {output_path}")
-    plt.show()
+    if SHOW_PLOTS:
+        plt.show()
     plt.close(fig)
 
 def main():

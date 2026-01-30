@@ -1,4 +1,6 @@
 import os
+import matplotlib
+matplotlib.use("Agg")
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -18,6 +20,9 @@ plt.rcParams['axes.unicode_minus'] = False
 # spacing constants
 LABEL_PAD = 10   # distance between axis and axis label
 TICK_PAD = 6     # distance between ticks and axis
+
+# Use SHOW_PLOTS=1 for interactive windows
+SHOW_PLOTS = os.environ.get("SHOW_PLOTS", "").strip() in {"1", "true", "TRUE", "yes", "YES"}
 
 
 def load_orphan_blocks():
@@ -70,6 +75,9 @@ def load_run_data():
     print(f"Loading run summary data from: {path}")
     runs = pd.read_csv(path)
     runs['start_ts'] = pd.to_datetime(runs['start_ts'])
+    # Normalize timezone: make tz-naive to match all_blocks_df segments
+    if runs['start_ts'].dt.tz is not None:
+        runs['start_ts'] = runs['start_ts'].dt.tz_localize(None)
     return runs
 
 
@@ -171,7 +179,8 @@ def create_hourly_timeline(all_blocks_df, segments_info, config):
     out_path = 'fig/hourly_validity_timeline.pdf'
     plt.savefig(out_path, bbox_inches='tight', dpi=300)
     print(f"Saved timeline figure to {out_path}")
-    plt.show()
+    if SHOW_PLOTS:
+        plt.show()
     plt.close(fig)
 
 

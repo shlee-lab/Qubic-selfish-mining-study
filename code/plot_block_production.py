@@ -1,5 +1,7 @@
 import os
 import pandas as pd
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import datetime
@@ -13,6 +15,9 @@ plt.rcParams['axes.unicode_minus'] = False
 # spacing constants
 LABEL_PAD = 10   # distance between axis and axis label
 TICK_PAD  = 6    # distance between ticks and axis
+
+# Use SHOW_PLOTS=1 for interactive windows
+SHOW_PLOTS = os.environ.get("SHOW_PLOTS", "").strip() in {"1", "true", "TRUE", "yes", "YES"}
 
 # difficulty 0x-hex -> int
 def hex_to_int(x):
@@ -191,7 +196,8 @@ def analyze_qubic_mining():
     fig1.tight_layout()
     fig1.savefig('fig/mining_share.pdf', dpi=300, bbox_inches='tight')
     print("Saved fig/mining_share.pdf")
-    plt.show()  # Display the plot
+    if SHOW_PLOTS:
+        plt.show()
     plt.close(fig1)
 
     # ===== Figure 2: Stacked bars + daily avg difficulty line (twin y-axis) =====
@@ -248,7 +254,8 @@ def analyze_qubic_mining():
     fig2.tight_layout()
     fig2.savefig('fig/block_production.pdf', dpi=300, bbox_inches='tight')
     print("Saved fig/block_production.pdf")
-    plt.show()  # Display the plot
+    if SHOW_PLOTS:
+        plt.show()
     plt.close(fig2)
 
     print("\n=== Analysis Results Summary ===")
