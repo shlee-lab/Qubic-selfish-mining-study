@@ -1,5 +1,8 @@
+import os
 import pandas as pd
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.ticker import FixedLocator
@@ -12,6 +15,9 @@ plt.rcParams["hatch.linewidth"] = 2.6
 # spacing constants (same as your other script)
 LABEL_PAD = 10
 TICK_PAD = 6
+
+# Use SHOW_PLOTS=1 for interactive windows
+SHOW_PLOTS = os.environ.get("SHOW_PLOTS", "").strip() in {"1", "true", "TRUE", "yes", "YES"}
 
 path = "data/blocks-proof.csv"
 df = pd.read_csv(path)
@@ -204,5 +210,6 @@ fig.subplots_adjust(left=0.08, right=0.99, bottom=0.22, top=0.98)
 out_pdf = "fig/qubic_withholding_timeline.pdf"
 fig.savefig(out_pdf, format="pdf", bbox_inches="tight")
 
-plt.show()
+if SHOW_PLOTS:
+    plt.show()
 print("Saved:", out_pdf)

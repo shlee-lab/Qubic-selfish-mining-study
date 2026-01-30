@@ -24,6 +24,26 @@ TICK_PAD = 6     # distance between ticks and axis
 # Use SHOW_PLOTS=1 for interactive windows
 SHOW_PLOTS = os.environ.get("SHOW_PLOTS", "").strip() in {"1", "true", "TRUE", "yes", "YES"}
 
+def _parse_figsize_env(var_name: str, default: tuple[float, float]) -> tuple[float, float]:
+    """
+    Parse an environment variable like "15,4.2" into a (w,h) tuple.
+    """
+    raw = os.environ.get(var_name, "").strip()
+    if not raw:
+        return default
+    try:
+        w_s, h_s = raw.split(",", 1)
+        return (float(w_s.strip()), float(h_s.strip()))
+    except Exception:
+        return default
+
+# Match aspect ratio with fig/qubic_withholding_timeline.pdf (from plot_withhold.py)
+WITHHOLD_FIGSIZE = (15.0, 4.2)
+# Default paper-like size for Fig.6 unless overridden
+HOURLY_TIMELINE_FIGSIZE = _parse_figsize_env("HOURLY_TIMELINE_FIGSIZE", (15.0, 6.0))
+# If set, force hourly timeline to match the withholding timeline aspect ratio
+MATCH_WITHHOLD_TIMELINE = os.environ.get("MATCH_WITHHOLD_TIMELINE", "").strip() in {"1", "true", "TRUE", "yes", "YES"}
+
 
 def load_orphan_blocks():
     """
@@ -141,7 +161,8 @@ def create_hourly_timeline(all_blocks_df, segments_info, config):
     merged_spans = segments_info['merged_spans']
     raw_spans = segments_info['raw_spans']
 
-    fig, ax = plt.subplots(figsize=(15, 6))
+    figsize = WITHHOLD_FIGSIZE if MATCH_WITHHOLD_TIMELINE else HOURLY_TIMELINE_FIGSIZE
+    fig, ax = plt.subplots(figsize=figsize)
     bar_width = 1.0 / 24.0
 
     ax.bar(idx, q_counts.values, label='Qubic orphan blocks', color='#2E86AB', alpha=0.8, width=bar_width)
