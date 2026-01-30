@@ -1,1 +1,1 @@
-Generated figures and notebooks outputs.
+논문에 포함된 그림 산출물 폴더입니다.

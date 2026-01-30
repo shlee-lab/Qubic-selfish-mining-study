@@ -1,11 +1,13 @@
 import pandas as pd
 import numpy as np
 
+DERIVED_DIR = "derived"
+
 def main():
     # Load data
     print("Loading data...")
-    revenue_df = pd.read_csv('period_revenue_stats.csv')
-    gamma_df = pd.read_csv('qubic_gamma_period_analysis.csv')
+    revenue_df = pd.read_csv(f'{DERIVED_DIR}/period_revenue_stats.csv')
+    gamma_df = pd.read_csv(f'{DERIVED_DIR}/qubic_gamma_period_analysis.csv')
 
     # Merge on period label
     # Gamma CSV has 'period' column (P1, P2...), Revenue CSV has 'label' column (P1, P2...)

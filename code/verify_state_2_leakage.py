@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
+DERIVED_DIR = "derived"
+
 def load_blocks():
     """Load and preprocess block data"""
     print("Loading blocks data...")
@@ -103,8 +105,10 @@ def verify_state_2_leakage():
     
     # Save leakage data
     df = pd.DataFrame(leakage_data)
-    df.to_csv('state_2_leakage_analysis.csv', index=False)
-    print("\nSaved detailed leakage data to state_2_leakage_analysis.csv")
+    os.makedirs(DERIVED_DIR, exist_ok=True)
+    out_csv = f"{DERIVED_DIR}/state_2_leakage_analysis.csv"
+    df.to_csv(out_csv, index=False)
+    print(f"\nSaved detailed leakage data to {out_csv}")
 
 if __name__ == "__main__":
     verify_state_2_leakage()

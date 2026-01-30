@@ -1,8 +1,10 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 from datetime import datetime, timedelta
 
+DERIVED_DIR = "derived"
 
 def load_blocks():
 	"""Load and preprocess block data"""
@@ -243,7 +245,8 @@ def main():
 	print(f"Weeks with 0' states: {len(weekly_df[weekly_df['estimated_0_prime_count'] > 0])}")
 	
 	# Save results
-	weekly_df.to_csv('qubic_gamma_weekly_analysis.csv', index=False)
+	os.makedirs(DERIVED_DIR, exist_ok=True)
+	weekly_df.to_csv(f'{DERIVED_DIR}/qubic_gamma_weekly_analysis.csv', index=False)
 	
 	print("\nCreating weekly dual-axis chart...")
 	create_weekly_dual_axis_chart(weekly_df)

@@ -1,10 +1,12 @@
 import pandas as pd
 
+DERIVED_DIR = "derived"
+
 def analyze_p8_leakage():
     print("Analyzing P8 Leakage...")
     
     # Load leakage data
-    df = pd.read_csv('state_2_leakage_analysis.csv')
+    df = pd.read_csv(f'{DERIVED_DIR}/state_2_leakage_analysis.csv')
     df['honest_h_time'] = pd.to_datetime(df['honest_h_time'])
     
     # P8 Timestamps

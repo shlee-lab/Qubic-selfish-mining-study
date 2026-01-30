@@ -5,3 +5,10 @@ __pycache__/
 .DS_Store
 *:Zone.Identifier
 
+# local outputs / scratch
+tmp/
+derived/
+
+# local paper drafts / PDFs (do not commit)
+paper/
+

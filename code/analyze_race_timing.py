@@ -2,6 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
+DERIVED_DIR = "derived"
+
 def analyze_race_timing():
     print("Analyzing Race Timing Distribution...")
     
@@ -12,11 +14,12 @@ def analyze_race_timing():
     # Actually, verify_state_2_leakage.py saved 'state_2_leakage_analysis.csv'
     # Let's load that.
     
-    if not os.path.exists('state_2_leakage_analysis.csv'):
-        print("Error: state_2_leakage_analysis.csv not found. Run verify_state_2_leakage.py first.")
+    in_csv = os.path.join(DERIVED_DIR, 'state_2_leakage_analysis.csv')
+    if not os.path.exists(in_csv):
+        print(f"Error: {in_csv} not found. Run verify_state_2_leakage.py first.")
         return
 
-    df = pd.read_csv('state_2_leakage_analysis.csv')
+    df = pd.read_csv(in_csv)
     
     # Filter for "True Race Wins" (Qubic won, but not State 2)
     # In the CSV, 'is_leakage' is True if Qubic(H+1) < Honest(H).

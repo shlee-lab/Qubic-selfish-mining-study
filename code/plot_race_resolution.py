@@ -7,6 +7,8 @@ from analyze_periods import (
     compute_hourly_valid_segments,
 )
 
+# Store derived CSV outputs outside repo root
+DERIVED_DIR = "derived"
 # Font settings for better display
 plt.rcParams['font.family'] = 'DejaVu Sans'
 plt.rcParams['axes.unicode_minus'] = False
@@ -201,8 +203,10 @@ def main():
     
     # Save CSV
     df = pd.DataFrame(results)
-    df.to_csv('race_resolution_stats.csv', index=False)
-    print("Saved analysis data to race_resolution_stats.csv")
+    os.makedirs(DERIVED_DIR, exist_ok=True)
+    out_csv = f"{DERIVED_DIR}/race_resolution_stats.csv"
+    df.to_csv(out_csv, index=False)
+    print(f"Saved analysis data to {out_csv}")
     
     print("\nAnalysis complete!")
 

@@ -13,7 +13,7 @@ plt.rcParams["hatch.linewidth"] = 2.6
 LABEL_PAD = 10
 TICK_PAD = 6
 
-path = r"data\blocks-proof.csv"
+path = "data/blocks-proof.csv"
 df = pd.read_csv(path)
 
 def parse_best_datetime_column(df: pd.DataFrame):
@@ -201,7 +201,7 @@ for spine in ax.spines.values():
 fig.subplots_adjust(left=0.08, right=0.99, bottom=0.22, top=0.98) 
 
 # ===== Export to PDF =====
-out_pdf = r"fig/qubic_withhold_timeline.pdf"
+out_pdf = "fig/qubic_withholding_timeline.pdf"
 fig.savefig(out_pdf, format="pdf", bbox_inches="tight")
 
 plt.show()

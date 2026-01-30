@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
+import os
+
+DERIVED_DIR = "derived"
 
 
 def load_blocks():
@@ -157,8 +160,9 @@ def main():
 	print(f"Weeks with competitions: {len(weekly_df[weekly_df['total_competitions'] > 0])}")
 	
 	# Save results
-	competitions_df.to_csv('non_qubic_competitions.csv', index=False)
-	weekly_df.to_csv('non_qubic_gamma_weekly_analysis.csv', index=False)
+	os.makedirs(DERIVED_DIR, exist_ok=True)
+	competitions_df.to_csv(f'{DERIVED_DIR}/non_qubic_competitions.csv', index=False)
+	weekly_df.to_csv(f'{DERIVED_DIR}/non_qubic_gamma_weekly_analysis.csv', index=False)
 	
 	print("\nCreating weekly dual-axis chart...")
 	create_weekly_dual_axis_chart(weekly_df)

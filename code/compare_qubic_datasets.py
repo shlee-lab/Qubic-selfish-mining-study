@@ -3,6 +3,8 @@ import numpy as np
 from datetime import datetime
 import os
 
+OUT_DIR = os.path.join("data", "derived")
+
 def compare_qubic_datasets():
     """
     Compare Qubic blocks identified in all_blocks.csv vs blocks-proof.csv
@@ -14,7 +16,7 @@ def compare_qubic_datasets():
     # Load datasets
     print("\n1. 데이터 로딩 중...")
     all_blocks = pd.read_csv('data/all_blocks.csv')
-    proof_blocks = pd.read_csv('external_data/blocks-proof.csv')
+    proof_blocks = pd.read_csv('data/blocks-proof.csv')
     
     # Convert timestamps
     all_blocks['timestamp'] = pd.to_datetime(all_blocks['timestamp'])
@@ -365,40 +367,40 @@ def compare_qubic_datasets():
     
     # Save detailed comparison
     print("\n10. 상세 비교 결과 저장 중...")
-    os.makedirs('data', exist_ok=True)
+    os.makedirs(OUT_DIR, exist_ok=True)
     
     # Save unmatched blocks (full period)
     if len(unmatched_all) > 0:
         unmatched_all[['timestamp', 'height', 'block hash', 'is_orphan']].to_csv(
-            'data/qubic_blocks_only_in_all_blocks.csv', index=False
+            os.path.join(OUT_DIR, 'qubic_blocks_only_in_all_blocks.csv'), index=False
         )
-        print(f"   - all_blocks에만 있는 블록 (전체 기간): data/qubic_blocks_only_in_all_blocks.csv")
+        print(f"   - all_blocks에만 있는 블록 (전체 기간): {OUT_DIR}/qubic_blocks_only_in_all_blocks.csv")
     
     if len(unmatched_proof) > 0:
         unmatched_proof[['Timestamp', 'Height', 'Id', 'Status']].to_csv(
-            'data/qubic_blocks_only_in_proof.csv', index=False
+            os.path.join(OUT_DIR, 'qubic_blocks_only_in_proof.csv'), index=False
         )
-        print(f"   - blocks-proof에만 있는 블록 (전체 기간): data/qubic_blocks_only_in_proof.csv")
+        print(f"   - blocks-proof에만 있는 블록 (전체 기간): {OUT_DIR}/qubic_blocks_only_in_proof.csv")
     
     # Save unmatched blocks (overlapping period)
     if len(unmatched_all_overlap) > 0:
         unmatched_all_overlap[['timestamp', 'height', 'block hash', 'is_orphan']].to_csv(
-            'data/qubic_blocks_only_in_all_blocks_overlap.csv', index=False
+            os.path.join(OUT_DIR, 'qubic_blocks_only_in_all_blocks_overlap.csv'), index=False
         )
-        print(f"   - all_blocks에만 있는 블록 (교집합 기간): data/qubic_blocks_only_in_all_blocks_overlap.csv")
+        print(f"   - all_blocks에만 있는 블록 (교집합 기간): {OUT_DIR}/qubic_blocks_only_in_all_blocks_overlap.csv")
     
     if len(unmatched_proof_overlap) > 0:
         unmatched_proof_overlap[['Timestamp', 'Height', 'Id', 'Status']].to_csv(
-            'data/qubic_blocks_only_in_proof_overlap.csv', index=False
+            os.path.join(OUT_DIR, 'qubic_blocks_only_in_proof_overlap.csv'), index=False
         )
-        print(f"   - blocks-proof에만 있는 블록 (교집합 기간): data/qubic_blocks_only_in_proof_overlap.csv")
+        print(f"   - blocks-proof에만 있는 블록 (교집합 기간): {OUT_DIR}/qubic_blocks_only_in_proof_overlap.csv")
     
     # Save daily comparison
-    daily_comparison.to_csv('data/daily_qubic_comparison.csv')
-    print(f"   - 일별 비교 (전체 기간): data/daily_qubic_comparison.csv")
+    daily_comparison.to_csv(os.path.join(OUT_DIR, 'daily_qubic_comparison.csv'))
+    print(f"   - 일별 비교 (전체 기간): {OUT_DIR}/daily_qubic_comparison.csv")
     
-    daily_comparison_overlap.to_csv('data/daily_qubic_comparison_overlap.csv')
-    print(f"   - 일별 비교 (교집합 기간): data/daily_qubic_comparison_overlap.csv")
+    daily_comparison_overlap.to_csv(os.path.join(OUT_DIR, 'daily_qubic_comparison_overlap.csv'))
+    print(f"   - 일별 비교 (교집합 기간): {OUT_DIR}/daily_qubic_comparison_overlap.csv")
     
     print("\n분석 완료!")
 

@@ -8,9 +8,11 @@ from analyze_periods import (
     compute_hourly_valid_segments,
 )
 
+# Store derived CSV outputs outside repo root
+DERIVED_DIR = "derived"
 # Try to import adjustText for better label placement
 try:
-    from adjustText import adjust_text
+    from adjustText import adjust_text  # type: ignore
     HAS_ADJUST_TEXT = True
 except ImportError:
     HAS_ADJUST_TEXT = False
@@ -141,8 +143,10 @@ def compute_period_statistics(all_blocks_df, merged_spans):
     
     # Save to CSV
     stats_df = pd.DataFrame(period_stats)
-    stats_df.to_csv('period_revenue_stats.csv', index=False)
-    print("Saved period statistics to period_revenue_stats.csv")
+    os.makedirs(DERIVED_DIR, exist_ok=True)
+    out_csv = f"{DERIVED_DIR}/period_revenue_stats.csv"
+    stats_df.to_csv(out_csv, index=False)
+    print(f"Saved period statistics to {out_csv}")
     
     return period_stats
 

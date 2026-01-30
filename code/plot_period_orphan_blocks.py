@@ -50,7 +50,25 @@ def load_orphan_blocks():
     return qubic_orphan_blocks, other_orphan_blocks, all_blocks_df
 
 def load_run_data():
-    runs = pd.read_csv('data/qubic_orphan_start_qubic_continuous_split.csv')
+    """
+    Load run-summary CSV used for per-period run scatter.
+
+    Historical filename (may be renamed in repo history):
+      - data/qubic_orphan_start_qubic_continuous_split.csv
+
+    Current repo provides an equivalent schema at:
+      - data/selfish_mining_blocks.csv
+
+    For reproducibility, we fall back when the historical filename is absent.
+    """
+    # Canonical filename in this repo
+    primary = 'data/selfish_mining_blocks.csv'
+    # Historical filename (kept as fallback for old checkouts)
+    fallback = 'data/qubic_orphan_start_qubic_continuous_split.csv'
+
+    path = primary if os.path.exists(primary) else fallback
+    print(f"Loading run summary data from: {path}")
+    runs = pd.read_csv(path)
     runs['start_ts'] = pd.to_datetime(runs['start_ts'])
     return runs
 
@@ -235,11 +253,63 @@ def main():
     else:
         print("  Overall dataset share: N/A")
 
-    print("\nGenerating selfish mining run scatter plot...")
-    create_run_scatter(runs_df, segments_info, HOURLY_VALIDITY_CONFIG)
+    if os.environ.get("SKIP_RUN_SCATTER", "").strip() not in {"1", "true", "TRUE", "yes", "YES"}:
+        print("\nGenerating selfish mining run scatter plot...")
+        create_run_scatter(runs_df, segments_info, HOURLY_VALIDITY_CONFIG)
+    else:
+        print("\nSkipping run scatter plot (SKIP_RUN_SCATTER set).")
 
     print("\nGenerating hourly timeline plot...")
-    create_hourly_timeline(all_blocks_df, segments_info, HOURLY_VALIDITY_CONFIG)
+    # Allow override output path for reproducibility tests without overwriting repo figure.
+    out_override = os.environ.get("HOURLY_TIMELINE_OUT", "").strip()
+    if out_override:
+        # Monkeypatch the output path by temporarily overriding the module-level constant use.
+        # The plotting function uses a local variable, so we pass via env and branch here.
+        idx = segments_info['index']
+        q_counts = segments_info['qubic_counts']
+        o_counts = segments_info['other_counts']
+        total_counts = segments_info['total_counts']
+        merged_spans = segments_info['merged_spans']
+        raw_spans = segments_info['raw_spans']
+
+        fig, ax = plt.subplots(figsize=(15, 6))
+        bar_width = 1.0 / 24.0
+
+        ax.bar(idx, q_counts.values, label='Qubic orphan blocks', color='#2E86AB', alpha=0.8, width=bar_width)
+        ax.bar(idx, o_counts.values, bottom=q_counts.values, label='Other orphan blocks', color='#A23B72', alpha=0.6, width=bar_width)
+
+        for s, e in raw_spans:
+            ax.axvspan(s, e, color='green', alpha=0.1, zorder=0)
+        y_upper = ax.get_ylim()[1] if ax.get_ylim()[1] > 0 else 1
+        for idx_i, (s, e) in enumerate(merged_spans, start=1):
+            ax.axvspan(s, e, color='green', alpha=0.25, zorder=1)
+            mid = s + (e - s) / 2
+            ax.text(
+                mid,
+                y_upper * 0.9,
+                f'P{idx_i}',
+                ha='center',
+                va='center',
+                fontsize=15,
+                color='black'
+            )
+
+        ax.set_ylabel('Orphan blocks per hour', fontsize=14, labelpad=LABEL_PAD)
+        ax.set_xlabel('Date', fontsize=14, labelpad=LABEL_PAD)
+        ax.tick_params(axis='both', pad=TICK_PAD)
+        ax.grid(True, alpha=0.3, axis='y')
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+        ax.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=mdates.MONDAY, interval=1))
+        plt.setp(ax.xaxis.get_majorticklabels(), rotation=45)
+        ax.legend(loc='upper right')
+        fig.tight_layout()
+
+        os.makedirs(os.path.dirname(out_override) or '.', exist_ok=True)
+        plt.savefig(out_override, bbox_inches='tight', dpi=300)
+        print(f"Saved timeline figure to {out_override}")
+        plt.close(fig)
+    else:
+        create_hourly_timeline(all_blocks_df, segments_info, HOURLY_VALIDITY_CONFIG)
 
     print("\n" + "=" * 80)
     print("Visualization Complete")
