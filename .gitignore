@@ -5,6 +5,9 @@ __pycache__/
 .DS_Store
 *:Zone.Identifier
 
+# Node/JS dependencies
+**/node_modules/
+
 # local outputs / scratch
 tmp/
 derived/
