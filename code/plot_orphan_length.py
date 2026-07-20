@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+
+from data_utils import load_blocks
 import matplotlib.dates as mdates
 from datetime import datetime, timedelta
 
@@ -101,7 +103,7 @@ def method_dodged_log(ax, weekly: pd.DataFrame):
     ax.grid(True, axis='y', alpha=0.3, color="black", linewidth=0.5)
 
 def main():
-    df = pd.read_csv('data/all_blocks.csv')
+    df = load_blocks()
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     weekly, forks = prepare_weekly_tables(df)
 

@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+from data_utils import load_blocks as load_augmented_blocks
+
 from analyze_periods import (
     HOURLY_VALIDITY_CONFIG,
     compute_hourly_valid_segments,
@@ -26,7 +28,7 @@ plt.rcParams['axes.unicode_minus'] = False
 def load_blocks():
     """Load all blocks data."""
     print("Loading blocks data...")
-    all_blocks_df = pd.read_csv('data/all_blocks.csv')
+    all_blocks_df = load_augmented_blocks()
     all_blocks_df['timestamp'] = pd.to_datetime(all_blocks_df['timestamp'])
     
     # Normalize timezone: remove timezone info if present
@@ -374,4 +376,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

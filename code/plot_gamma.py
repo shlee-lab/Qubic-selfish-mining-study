@@ -4,11 +4,13 @@ import matplotlib.pyplot as plt
 import os
 from datetime import datetime, timedelta
 
+from data_utils import load_blocks as load_augmented_blocks
+
 DERIVED_DIR = "derived"
 
 def load_blocks():
 	"""Load and preprocess block data"""
-	blocks = pd.read_csv('data/all_blocks.csv')
+	blocks = load_augmented_blocks()
 	blocks['timestamp'] = pd.to_datetime(blocks['timestamp'])
 	if blocks['timestamp'].dt.tz is not None:
 		blocks['timestamp'] = blocks['timestamp'].dt.tz_localize(None)
@@ -122,8 +124,12 @@ def calculate_weekly_gamma_with_0_prime_estimation(states_df, blocks_df):
 			# Check if it's Qubic vs Honest (at least one of each)
 			has_qubic = h_blocks['is_qubic'].any()
 			has_honest = (~h_blocks['is_qubic']).any()
+			qubic_count = int(h_blocks['is_qubic'].sum())
 			
-			if has_qubic and has_honest:
+			# Gamma is defined for a binary race between one Qubic block and
+			# another miner's block.  Same-height Qubic self forks are not
+			# binary tie-breaking events and are excluded.
+			if has_qubic and has_honest and qubic_count == 1:
 				# 1. Check if it ended as 2:1 (Next block exists)
 				next_h = h + 1
 				next_blocks = blocks_df[blocks_df['height'] == next_h]

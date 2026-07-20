@@ -5,6 +5,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from data_utils import load_blocks as load_augmented_blocks
+
 ALL_BLOCKS_PATH = "data/all_blocks.csv"
 FIG_PATH = "fig/orphan_run_length.pdf"
 CSV_PATH = "data/selfish_mining_blocks.csv"
@@ -16,7 +18,7 @@ def _to_utc(s: pd.Series) -> pd.Series:
         return s.dt.tz_localize("UTC")
 
 def load_all_blocks(path: str) -> pd.DataFrame:
-    df = pd.read_csv(path, usecols=["height","timestamp","is_orphan","is_qubic"])
+    df = load_augmented_blocks(path)[["height", "timestamp", "is_orphan", "is_qubic"]].copy()
     df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True, errors="coerce")
     df["height"] = pd.to_numeric(df["height"], errors="raise").astype(np.int64)
     df["is_orphan"] = df["is_orphan"].astype(bool)
@@ -53,8 +55,24 @@ def compute_runs_consecutive(orphan_h: pd.DataFrame) -> pd.DataFrame:
     ).sort_values("run_first_height").reset_index(drop=True)
     return runs
 
-def count_qubic_main_between(main: pd.DataFrame, prev_main_ts: pd.Series, right_ts: pd.Series) -> np.ndarray:
-    mts_q = main.loc[main["is_qubic"], "timestamp"].to_numpy("datetime64[ns]")
+def count_qubic_main_between(
+    main: pd.DataFrame,
+    prev_main_ts: pd.Series,
+    right_ts: pd.Series,
+    run_first_height: pd.Series,
+    run_last_height: pd.Series,
+) -> np.ndarray:
+    """Count the timestamp-window blocks plus Qubic winners at contested heights.
+
+    The original timestamp-only proxy could assign length zero when the Qubic
+    main-chain block replacing an orphan had a timestamp later than the final
+    orphan timestamp.  The height-inclusive proxy retains the original window
+    and unions it with accepted Qubic blocks at the run's contested heights.
+    """
+    q_main = main.loc[main["is_qubic"], ["height", "timestamp"]].copy()
+    q_main = q_main.sort_values("timestamp", kind="mergesort")
+    mts_q = q_main["timestamp"].to_numpy("datetime64[ns]")
+    heights_q = q_main["height"].to_numpy(np.int64)
     if len(mts_q) == 0:
         return np.zeros(len(prev_main_ts), dtype=np.int64)
     left = prev_main_ts.to_numpy("datetime64[ns]")
@@ -62,7 +80,14 @@ def count_qubic_main_between(main: pd.DataFrame, prev_main_ts: pd.Series, right_
     left = np.where(pd.isna(left), np.datetime64("1677-09-21T00:12:43.145224192"), left)
     li = np.searchsorted(mts_q, left, side="right")
     ri = np.searchsorted(mts_q, right, side="right")
-    return (ri - li).astype(np.int64)
+    first = pd.to_numeric(run_first_height, errors="raise").to_numpy(np.int64)
+    last = pd.to_numeric(run_last_height, errors="raise").to_numpy(np.int64)
+    counts = np.zeros(len(first), dtype=np.int64)
+    for idx, (left_idx, right_idx, first_h, last_h) in enumerate(zip(li, ri, first, last)):
+        timestamp_window_heights = set(heights_q[left_idx:right_idx])
+        contested_winner_heights = set(heights_q[(heights_q >= first_h) & (heights_q <= last_h)])
+        counts[idx] = len(timestamp_window_heights | contested_winner_heights)
+    return counts
 
 def compute_qubic_only(df: pd.DataFrame):
     main = build_main(df)
@@ -80,7 +105,13 @@ def compute_qubic_only(df: pd.DataFrame):
     prev_heights = runs["run_first_height"].to_numpy(np.int64) - 1
     prev_ts = main.set_index("height").reindex(prev_heights)["timestamp"].reset_index(drop=True)
 
-    selfish_len = count_qubic_main_between(main, prev_ts, runs["last_orphan_ts"])
+    selfish_len = count_qubic_main_between(
+        main,
+        prev_ts,
+        runs["last_orphan_ts"],
+        runs["run_first_height"],
+        runs["run_last_height"],
+    )
 
     res = pd.DataFrame({
         "run_first_height": runs["run_first_height"].to_numpy(np.int64),

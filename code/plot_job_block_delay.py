@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+
+from data_utils import load_blocks
 from datetime import datetime
 
 # Font settings for better display
@@ -70,7 +72,7 @@ def load_data():
     job_fetch_mean, job_fetch_std = calculate_job_fetch_period(jobs_df)
     
     print("Loading all_blocks.csv...")
-    blocks_df = pd.read_csv('data/all_blocks.csv')
+    blocks_df = load_blocks()
     blocks_df['timestamp'] = pd.to_datetime(blocks_df['timestamp'], utc=True)
     # Make tz-naive to match jobs_df
     if blocks_df['timestamp'].dt.tz is not None:
@@ -256,4 +258,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

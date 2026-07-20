@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+
+from data_utils import load_blocks
 import matplotlib.dates as mdates
 from datetime import datetime
 import numpy as np
@@ -42,7 +44,7 @@ def analyze_qubic_mining():
 
     # Load CSV file
     print("Loading data...")
-    df = pd.read_csv('data/all_blocks.csv')
+    df = load_blocks()
 
     # Convert timestamp to datetime
     df['timestamp'] = pd.to_datetime(df['timestamp'])

@@ -7,6 +7,8 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from datetime import datetime, timedelta
 
+from data_utils import load_blocks
+
 # ---------------------------------------------------------------------------
 # Hourly validity parameters shared with plotting utilities
 # ---------------------------------------------------------------------------
@@ -44,7 +46,13 @@ def aggregate_counts_hourly(all_blocks_df: pd.DataFrame):
     q_counts = qubic.groupby("hour").size().rename("Qubic")
     o_counts = other.groupby("hour").size().rename("Other")
 
-    index = q_counts.index.union(o_counts.index).sort_values()
+    observed_index = q_counts.index.union(o_counts.index).sort_values()
+    # Preserve zero-orphan hours in the time axis.  Without this reindexing,
+    # two non-adjacent observations can be mistaken for consecutive hours.
+    if len(observed_index):
+        index = pd.date_range(observed_index.min(), observed_index.max(), freq="h")
+    else:
+        index = observed_index
     q_counts = q_counts.reindex(index, fill_value=0)
     o_counts = o_counts.reindex(index, fill_value=0)
     return index, q_counts, o_counts
@@ -141,7 +149,7 @@ def load_data(hourly_variant: dict | None = None):
     
     # Load all blocks to compute hourly orphan counts
     print(f"  Loading all_blocks.csv to compute hourly orphan activity...")
-    all_blocks_df = pd.read_csv('data/all_blocks.csv')
+    all_blocks_df = load_blocks()
     all_blocks_df['timestamp'] = pd.to_datetime(all_blocks_df['timestamp'])
     
     if all_blocks_df['timestamp'].dt.tz is not None:
@@ -396,7 +404,7 @@ def create_period_visualizations_by_status(data, filter_results):
         # Get all runs within this period
         period_runs = data[
             (data['start_ts'] >= period['start_date']) & 
-            (data['start_ts'] <= period['end_date'])
+            (data['start_ts'] < period['end_date'])
         ]
         
         # Calculate total orphan count in this period
@@ -445,6 +453,11 @@ def create_period_group_visualization(data, periods, status_label):
         rows, cols = 2, 3
     elif num_periods <= 9:
         rows, cols = 3, 3
+    elif num_periods == 10 and status_label == "VALID":
+        # The paper uses ten candidate periods.  A compact 5-by-2 layout,
+        # shared axes, and one common colorbar devote more space to data than
+        # the former 4-by-3 layout with a colorbar in every panel.
+        rows, cols = 2, 5
     elif num_periods <= 12:
         rows, cols = 3, 4
     elif num_periods <= 16:
@@ -463,21 +476,48 @@ def create_period_group_visualization(data, periods, status_label):
     for period in periods:
         period_runs = data[
             (data['start_ts'] >= period['start_date']) & 
-            (data['start_ts'] <= period['end_date'])
+            (data['start_ts'] < period['end_date'])
         ]
         if len(period_runs) > 0:
             all_period_runs.append(period_runs)
     
     # Determine global max x and y values for consistent axis limits
+    compact_paper_layout = num_periods == 10 and status_label == "VALID"
+
     if len(all_period_runs) > 0:
         all_runs = pd.concat(all_period_runs, ignore_index=True)
         global_max_x = int(all_runs['length_qubic_run'].max()) if len(all_runs) > 0 else 1
         global_max_y = int(all_runs['total_orphans_on_run'].max()) if len(all_runs) > 0 else 1
+        global_coord_counts = all_runs.groupby(
+            ['length_qubic_run', 'total_orphans_on_run']
+        ).size()
+        global_max_count = int(global_coord_counts.max())
     else:
         global_max_x = 1
         global_max_y = 1
-    
-    fig, axes = plt.subplots(rows, cols, figsize=(6*cols, 6*rows))
+        global_max_count = 1
+
+    if compact_paper_layout:
+        from matplotlib.colors import PowerNorm
+        global_norm = PowerNorm(
+            gamma=0.5,
+            vmin=1,
+            vmax=max(2, global_max_count),
+        )
+    else:
+        global_norm = None
+
+    if compact_paper_layout:
+        fig, axes = plt.subplots(
+            rows,
+            cols,
+            figsize=(14.0, 5.8),
+            sharex=True,
+            sharey=True,
+            constrained_layout=True,
+        )
+    else:
+        fig, axes = plt.subplots(rows, cols, figsize=(6*cols, 6*rows))
     if num_periods == 1:
         axes = [axes]
     else:
@@ -489,58 +529,123 @@ def create_period_group_visualization(data, periods, status_label):
         # Filter runs that start within this period
         period_runs = data[
             (data['start_ts'] >= period['start_date']) & 
-            (data['start_ts'] <= period['end_date'])
+            (data['start_ts'] < period['end_date'])
         ]
+
+        if 'is_qubic_self_fork' in period_runs.columns:
+            self_fork_mask = period_runs['is_qubic_self_fork'].fillna(False).astype(bool)
+        else:
+            self_fork_mask = pd.Series(False, index=period_runs.index)
+        fork_runs = period_runs[~self_fork_mask]
+        self_fork_runs = period_runs[self_fork_mask]
         
         if len(period_runs) > 0:
-            # Count frequency of each (x, y) coordinate pair
-            coord_counts = period_runs.groupby(['length_qubic_run', 'total_orphans_on_run']).size().reset_index(name='count')
+            # Use all observations for a common frequency scale in each panel,
+            # while drawing self forks with a distinct marker.
+            all_coord_counts = period_runs.groupby(
+                ['length_qubic_run', 'total_orphans_on_run']
+            ).size().reset_index(name='count')
             
             # Set explicit vmin and vmax to match actual data range (prevents white band at top)
-            vmin = coord_counts['count'].min()
-            vmax = coord_counts['count'].max()
+            vmin = all_coord_counts['count'].min()
+            vmax = all_coord_counts['count'].max()
             
-            # Create scatter plot with size and color based on frequency
-            # Use norm to explicitly set the range to match data exactly
-            norm = plt.Normalize(vmin=vmin, vmax=vmax)
-            scatter = ax.scatter(coord_counts['length_qubic_run'], coord_counts['total_orphans_on_run'],
-                              s=coord_counts['count'] * 50,  # Size proportional to frequency
-                              c=coord_counts['count'],  # Color based on frequency
-                              cmap='Reds',  # Red color map (darker = more frequent)
-                              norm=norm,  # Explicit normalization matching data range exactly
-                              alpha=0.7, edgecolors='black', linewidths=0.5,
-                              zorder=3)  # Higher zorder so points appear on top of lines
-            
+            norm = global_norm if compact_paper_layout else plt.Normalize(vmin=vmin, vmax=vmax)
+
+            if len(fork_runs) > 0:
+                coord_counts = fork_runs.groupby(
+                    ['length_qubic_run', 'total_orphans_on_run']
+                ).size().reset_index(name='count')
+                ax.scatter(
+                    coord_counts['length_qubic_run'],
+                    coord_counts['total_orphans_on_run'],
+                    s=(
+                        32 + 26 * np.sqrt(coord_counts['count'])
+                        if compact_paper_layout
+                        else coord_counts['count'] * 50
+                    ),
+                    c=coord_counts['count'],
+                    cmap='Reds',
+                    norm=norm,
+                    alpha=0.7,
+                    edgecolors='black',
+                    linewidths=0.5,
+                    zorder=3,
+                )
+
+            if len(self_fork_runs) > 0:
+                self_fork_counts = self_fork_runs.groupby(
+                    ['length_qubic_run', 'total_orphans_on_run']
+                ).size().reset_index(name='count')
+                ax.scatter(
+                    self_fork_counts['length_qubic_run'],
+                    self_fork_counts['total_orphans_on_run'],
+                    s=(
+                        55 + 18 * np.sqrt(self_fork_counts['count'])
+                        if compact_paper_layout
+                        else 90 + self_fork_counts['count'] * 25
+                    ),
+                    marker='x',
+                    color='#4d4d4d',
+                    linewidths=2.0,
+                    zorder=5,
+                )
+                if not compact_paper_layout:
+                    for _, self_row in self_fork_counts.iterrows():
+                        ax.annotate(
+                            f"n={int(self_row['count'])}",
+                            (
+                                self_row['length_qubic_run'],
+                                self_row['total_orphans_on_run'],
+                            ),
+                            xytext=(5, 5),
+                            textcoords='offset points',
+                            fontsize=9,
+                            color='#333333',
+                            zorder=6,
+                        )
+
             # Add colorbar to show frequency scale
             # Create a ScalarMappable with exact range to ensure colorbar matches exactly
-            from matplotlib import cm
-            sm = cm.ScalarMappable(norm=norm, cmap='Reds')
-            sm.set_array([])  # Empty array, we just need the mappable for colorbar
-            
-            cbar = plt.colorbar(sm, ax=ax, extend='neither')
-            cbar.set_label('Frequency (number of runs)', fontsize=10)
-            
-            # Ensure colorbar image covers exactly the data range
-            # Set both the mappable limits and the axis limits
-            cbar.mappable.set_clim(vmin=vmin, vmax=vmax)
-            cbar.ax.set_ylim(vmin, vmax)
-            
-            # Filter ticks to show only integers (remove decimal ticks while maintaining natural spacing)
-            current_ticks = cbar.get_ticks()
-            integer_ticks = [tick for tick in current_ticks if tick == int(tick) and vmin <= tick <= vmax]
-            if len(integer_ticks) > 0:
-                cbar.set_ticks(integer_ticks)
-            # Format colorbar labels to show only integers
-            cbar.ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'{int(x)}'))
+            if not compact_paper_layout:
+                from matplotlib import cm
+                sm = cm.ScalarMappable(norm=norm, cmap='Reds')
+                sm.set_array([])  # Empty array, we just need the mappable for colorbar
+
+                cbar = plt.colorbar(sm, ax=ax, extend='neither')
+                cbar.set_label('Frequency (number of runs)', fontsize=10)
+
+                # Ensure colorbar image covers exactly the data range
+                # Set both the mappable limits and the axis limits
+                cbar.mappable.set_clim(vmin=vmin, vmax=vmax)
+                if vmin != vmax:
+                    cbar.ax.set_ylim(vmin, vmax)
+
+                # Filter ticks to show only integers (remove decimal ticks while maintaining natural spacing)
+                current_ticks = cbar.get_ticks()
+                integer_ticks = [tick for tick in current_ticks if tick == int(tick) and vmin <= tick <= vmax]
+                if len(integer_ticks) > 0:
+                    cbar.set_ticks(integer_ticks)
+                # Format colorbar labels to show only integers
+                cbar.ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'{int(x)}'))
         else:
             ax.text(0.5, 0.5, 'No data in this period', 
                    ha='center', va='center', transform=ax.transAxes)
         
         # Set consistent axis limits for all subplots
-        ax.set_xlim(0.5, global_max_x + 0.5)
+        # Zero-length Qubic runs are valid observations (for example, an
+        # orphan-only event).  Keep x=0 visible instead of clipping it at the
+        # left boundary.
+        ax.set_xlim(-0.5, global_max_x + 0.5)
         ax.set_ylim(-0.5, global_max_y + 0.5)
-        ax.set_xticks(range(1, global_max_x + 1))
-        ax.set_yticks(range(0, global_max_y + 1))
+        if compact_paper_layout:
+            from matplotlib.ticker import MaxNLocator
+            ax.xaxis.set_major_locator(MaxNLocator(nbins=5, integer=True))
+            ax.yaxis.set_major_locator(MaxNLocator(nbins=5, integer=True))
+            ax.tick_params(axis='both', labelsize=9)
+        else:
+            ax.set_xticks(range(0, global_max_x + 1))
+            ax.set_yticks(range(0, global_max_y + 1))
         # Format y-axis to show only integers
         ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'{int(x)}'))
         
@@ -556,32 +661,65 @@ def create_period_group_visualization(data, periods, status_label):
             y_line_2 = x_line - 2
             ax.plot(x_line, y_line_2, 'r:', linewidth=2, alpha=0.7, label='Reference (y=x-2)', zorder=1)
         
-        ax.set_xlabel('Qubic Run Length', fontsize=12)
-        ax.set_ylabel('Total Orphans in Run', fontsize=12)
+        if not compact_paper_layout:
+            ax.set_xlabel('Qubic Run Length', fontsize=12)
+            ax.set_ylabel('Total Orphans in Run', fontsize=12)
         
         # Include hour in date format for precise period boundaries
         period_label = f"{period['start_date'].strftime('%Y-%m-%d %H:%M')} to {period['end_date'].strftime('%Y-%m-%d %H:%M')}"
         
-        # Calculate or get total orphans for this period
-        if 'total_orphans' in period:
-            total_orphans = period['total_orphans']
+        if len(self_fork_runs) > 0:
+            self_fork_label = (
+                "self fork" if len(self_fork_runs) == 1 else "self forks"
+            )
+            count_label = (
+                f"{len(fork_runs)} runs, "
+                f"{len(self_fork_runs)} {self_fork_label}"
+            )
         else:
-            total_orphans = period_runs['total_orphans_on_run'].sum() if len(period_runs) > 0 else 0
+            count_label = f"{len(fork_runs)} runs"
         
         # Add alphabet label (a), (b), (c), etc.
         alphabet_label = chr(ord('a') + idx)
-        ax.set_title(f'({alphabet_label}) Selfish mining period {idx+1} ({total_orphans} cases)\n{period_label}', fontsize=12)
+        if compact_paper_layout:
+            ax.set_title(
+                f'({alphabet_label}) P{idx+1}\n{count_label}',
+                fontsize=9.5,
+                pad=4,
+            )
+        else:
+            ax.set_title(
+                f'({alphabet_label}) Candidate P{idx+1} ({count_label})\n{period_label}',
+                fontsize=12,
+            )
         ax.grid(True, alpha=0.3)
     
     # Hide unused subplots
     for idx in range(num_periods, len(axes)):
         axes[idx].axis('off')
     
-    plt.tight_layout()
+    if compact_paper_layout:
+        from matplotlib import cm
+        sm = cm.ScalarMappable(norm=global_norm, cmap='Reds')
+        sm.set_array([])
+        cbar = fig.colorbar(
+            sm,
+            ax=axes[:num_periods].tolist(),
+            fraction=0.025,
+            pad=0.015,
+        )
+        cbar.set_label('Run frequency', fontsize=10)
+        cbar.ax.tick_params(labelsize=8)
+        cbar.ax.yaxis.set_major_locator(MaxNLocator(nbins=5, integer=True))
+        fig.supxlabel('Qubic run length', fontsize=16)
+        fig.supylabel('Orphans in run', fontsize=16)
+    else:
+        plt.tight_layout()
     
-    # Save to PDF in fig folder
-    os.makedirs('fig', exist_ok=True)
-    filename = f'fig/orphan_run_length_{status_label.lower()}_periods.pdf'
+    # Keep exploratory diagnostics separate from the paper figure generated by
+    # plot_period_orphan_blocks.py.
+    os.makedirs('derived/diagnostics', exist_ok=True)
+    filename = f'derived/diagnostics/orphan_run_length_{status_label.lower()}_periods.pdf'
     plt.savefig(filename, bbox_inches='tight', dpi=300)
     print(f"  Saved visualization to {filename}")
     
@@ -818,7 +956,7 @@ def verify_orphan_counting():
     print(f"\nTotal runs in dataset: {len(df)}")
     
     # Load all blocks to get actual orphan blocks
-    all_blocks_df = pd.read_csv('data/all_blocks.csv')
+    all_blocks_df = load_blocks()
     all_blocks_df['timestamp'] = pd.to_datetime(all_blocks_df['timestamp'])
     
     # Get Qubic orphan blocks
@@ -894,4 +1032,3 @@ if __name__ == '__main__':
     verify_orphan_counting()
     
     segments = analyze_periods()
-

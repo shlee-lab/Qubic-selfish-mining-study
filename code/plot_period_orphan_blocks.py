@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import datetime, timedelta
 
+from data_utils import load_blocks, verified_qubic_self_fork_heights
+
 from analyze_periods import (
     HOURLY_VALIDITY_CONFIG,
     format_hourly_variant,
@@ -50,7 +52,7 @@ def load_orphan_blocks():
     Load all blocks and separate into Qubic orphan blocks and other orphan blocks.
     """
     print("Loading orphan blocks data...")
-    all_blocks_df = pd.read_csv('data/all_blocks.csv')
+    all_blocks_df = load_blocks()
     all_blocks_df['timestamp'] = pd.to_datetime(all_blocks_df['timestamp'])
     
     # Normalize timezone: remove timezone info if present
@@ -98,6 +100,26 @@ def load_run_data():
     # Normalize timezone: make tz-naive to match all_blocks_df segments
     if runs['start_ts'].dt.tz is not None:
         runs['start_ts'] = runs['start_ts'].dt.tz_localize(None)
+
+    # A same-height Qubic main block and Qubic orphan block form a self fork.
+    # Such events do not reveal a private lead and must be separated from the
+    # fork runs used for release policy interpretation.
+    blocks = load_blocks()
+    self_fork_heights = verified_qubic_self_fork_heights(blocks)
+    runs['is_qubic_self_fork'] = runs.apply(
+        lambda row: any(
+            height in self_fork_heights
+            for height in range(
+                int(row['start_height']),
+                int(row['end_height']) + 1,
+            )
+        ),
+        axis=1,
+    )
+    print(
+        "  Qubic self fork runs marked separately: "
+        f"{int(runs['is_qubic_self_fork'].sum())}"
+    )
     return runs
 
 
@@ -348,4 +370,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

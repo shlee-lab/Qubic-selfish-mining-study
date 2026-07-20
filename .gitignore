@@ -11,7 +11,7 @@ __pycache__/
 # local outputs / scratch
 tmp/
 derived/
+fig/orphan_run_length.pdf
 
 # local paper drafts / PDFs (do not commit)
 paper/
-
