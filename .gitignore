@@ -5,13 +5,13 @@ __pycache__/
 .DS_Store
 *:Zone.Identifier
 
-# Node/JS dependencies
-**/node_modules/
-
-# local outputs / scratch
+# Local outputs and scratch files
 tmp/
 derived/
-fig/orphan_run_length.pdf
+figures/
+plots/
 
-# local paper drafts / PDFs (do not commit)
+# Private material
 paper/
+private/
+visualizer/

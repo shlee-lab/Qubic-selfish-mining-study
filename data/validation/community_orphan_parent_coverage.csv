@@ -1,0 +1,4 @@
+scope,community_qubic_orphans,parent_known,coverage,parent_in_nodes,parent_in_community_set,missing
+all_community_qubic_orphans,1228,1218,0.99185667752443,1209,251,10
+orphans_in_node_observation_window,1216,1213,0.9975328947368421,1209,246,3
+orphans_also_observed_by_nodes,1123,1123,1.0,1123,220,0
